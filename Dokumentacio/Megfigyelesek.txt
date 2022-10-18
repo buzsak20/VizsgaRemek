@@ -1,0 +1,39 @@
+Linux statikus cím beállítása:
+
+1. Írjuk meg az alapértelmezett útvonalnak a routert (net-tools csomag szükséges hozzá)
+	a parancs a következő: route add default gw {IP-ADDRESS} {INTERFACE-NAME}
+
+2. Irjuk be a DNS szerverek ip címét a /etc/resolv.conf állományba
+	dns-nameserver {Dns szerver címe}
+	vagy
+	nameserver {Dns szerver címe}
+
+DHCP szerver beállítása esetén érdemes a következőkre figyelni:
+
+	A /etc/network/interfaces állományban ügyeljünk arra hogy, ha új hálózati adaptert veszünk fel akkor ezt tegyük a következő képpen:
+
+	 
+	allow-hotplug {Hálózatikártya neve}
+	iface {Hálózati kártya neve} inet {static vagy dhcp}
+	
+	{static esetén}
+		address {IP cím melyet az eszköz számára szeretnénk beállítani}
+		netmask {Az hálózatunk alhálózati maszkja}
+		network {Hálózatunk címe}
+		gateway {Alapértelmezett átjáró címe} <-- Ezzel ki tudjuk váltni a fentebb említett megoldást
+
+	A /etc/default/isc-dhcp-server állományban a megfelelő hálózatikártya nevét adjuk meg, melyen szeretnénk a dhcp szolgáltást nyújtani
+
+	INTERFACESv4"{Hálózati kártya neve}"
+
+	A /etc/dhcp/dhcpd.conf állományban érdemes figyelni a következőkre:
+
+	- Szabály felvétele a következőképpen lehetséges
+
+		subnet {Hálózatunk címe} netmask {Alhálózati maszkja} {
+			range {Mettől meddig osztunk ki IP címet (szőközzel válasszul el őket}
+			option routers {Az alapértelmezett átjáró címe (általában a szerver statikus IP címe)}
+}
+
+
+	
