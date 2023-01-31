@@ -1,0 +1,27 @@
+__Harmadik telephely__
+
+ip access-list extended VLAN75_ACCESS
+ permit ip 10.30.75.0 0.0.0.255 10.30.64.0 0.0.0.21
+ permit ip 10.30.75.0 0.0.0.255 10.30.40.0 0.0.0.7
+ permit ip 10.30.75.0 0.0.0.255 10.30.0.252 0.0.0.2
+ permit tcp 10.30.75.0 0.0.0.255 any eq www
+ permit tcp 10.30.75.0 0.0.0.255 any eq 443
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended VLAN66_ACCESS
+ permit ip 10.30.66.0 0.0.0.255 10.30.40.0 0.0.0.7
+ permit ip 10.30.66.0 0.0.0.255 10.30.0.252 0.0.0.2
+ permit tcp 10.30.66.0 0.0.0.255 any eq www
+ permit tcp 10.30.66.0 0.0.0.255 any eq 443
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended VLAN64_ACCESS
+ permit ip 10.30.66.0 0.0.0.255 10.30.40.0 0.0.0.7
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended SSH_ACCESS
+ permit ip host 10.30.40.2 any
+ permit ip host 10.30.40.3 any
