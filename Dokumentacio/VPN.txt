@@ -1,0 +1,114 @@
+
+https://www.timigate.com/2018/04/how-to-configure-site-to-site-ipsec-vpn-2.html
+
+vpnciscokey
+
+license boot module c2900 technology-package securityk9
+
+R1:
+---
+ip access-list extended VPN_Connection
+ permit ip 10.10.40.0 0.0.0.15 10.30.40.0 0.0.0.15
+exit
+
+crypto isakmp policy 1
+ encr aes
+ hash sha
+ authentication pre-share
+ group 2
+ lifetime 3600
+
+crypto isakmp key vpnciscokey address 193.41.4.2
+
+crypto ipsec transform-set VPN-SET esp-3des esp-sha-hmac
+
+crypto map VPN-MAP 1 ipsec-isakmp 
+ description VPN connection to Second Small Office
+ set peer 193.41.4.2
+ set transform-set VPN-SET 
+ match address VPN_Connection
+
+interface g0/0/0
+ crypto map VPN-MAP
+
+-----------------------------------------------------------------
+
+R2:
+---
+
+ip access-list extended VPN_Connection
+ permit ip 10.10.40.0 0.0.0.15 10.30.40.0 0.0.0.15
+exit
+
+crypto isakmp policy 1
+ encr aes
+ hash sha
+ authentication pre-share
+ group 2
+ lifetime 3600
+
+crypto isakmp key vpnciscokey address 193.41.4.2
+
+crypto ipsec transform-set VPN-SET esp-3des esp-sha-hmac
+
+crypto map VPN-MAP 1 ipsec-isakmp 
+ description VPN connection to Second Small Office
+ set peer 193.41.4.2
+ set transform-set VPN-SET 
+ match address VPN_Connection
+
+interface g0/0/0
+ crypto map VPN-MAP
+
+-----------------------------------------------------------------
+
+R1(2) for R1:
+-------------
+
+ip access-list extended VPN_Connection
+ permit ip 10.30.40.0 0.0.0.15 10.10.40.0 0.0.0.15
+
+crypto isakmp policy 1
+ encr aes
+ authentication pre-share
+ group 2
+ lifetime 3600
+
+crypto isakmp key vpnciscokey address 193.41.1.2
+
+crypto ipsec transform-set VPN-SET esp-3des esp-sha-hmac
+
+crypto map VPN-MAP 1 ipsec-isakmp 
+ description VPN connection to Main Office R1
+ set peer 193.41.1.2
+ set transform-set VPN-SET 
+ match address VPN_Connection
+
+interface g0/0/0
+ crypto map VPN-MAP
+
+-----------------------------------------------------------------
+
+R1(2) for R2:
+-------------
+
+ip access-list extended VPN_Connection
+ permit ip 10.30.40.0 0.0.0.15 10.10.40.0 0.0.0.15
+
+crypto isakmp policy 2
+ encr aes
+ authentication pre-share
+ group 2
+
+crypto isakmp key vpnciscokey address 193.41.2.2
+
+crypto ipsec transform-set VPN-SET esp-3des esp-sha-hmac
+
+crypto map VPN-MAP 2 ipsec-isakmp 
+ description VPN connection to Main Office R2
+ set peer 193.41.2.2
+ set transform-set VPN-SET 
+ match address VPN_Connection
+
+interface g0/0/0
+ crypto map VPN-MAP
