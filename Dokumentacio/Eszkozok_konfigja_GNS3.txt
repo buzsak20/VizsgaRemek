@@ -1,3 +1,5 @@
+__Első telephely eszköz konfiguráció__
+
 R1:
 
 hostname R1
@@ -146,6 +148,16 @@ interface Ethernet0/0
 no shut
 exit
 
+interface Ethernet 3/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet 3/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
 interface Ethernet3/2
  switchport trunk encapsulation dot1q
  switchport mode trunk
@@ -290,6 +302,16 @@ interface Ethernet0/0
 no shut
 exit
 
+interface Ethernet 3/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet 3/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
 interface Ethernet3/2
  switchport trunk encapsulation dot1q
  switchport mode trunk
@@ -367,6 +389,302 @@ interface Vlan93
 ip default-gateway 10.10.0.250
 
 ip route 0.0.0.0 0.0.0.0 10.10.0.250 
+
+line vty 0 4
+ login local
+ transport input ssh
+ exit
+end
+
+-----------------------------------------------------------------------------------
+
+ML-SW3:
+
+hostname ML-SW3
+
+ip routing
+
+username buzsak20 privilege 15 secret Titok2023
+username kkrisi privilege 15 secret Titok2023
+username zandras privilege 15 secret Titok2023
+
+ip ssh version 2
+ip domain-name kan.lan
+
+crypto key generate rsa general-keys modulus 1024
+
+vtp mode client
+vtp domain kan.lan
+vtp password thispasswordisasecret
+
+interface Ethernet 3/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet 3/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet3/2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ channel-protocol pagp
+ channel-group 2 mode desirable
+
+interface Ethernet3/3
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ channel-protocol pagp
+ channel-group 2 mode desirable
+
+interface Port-channel2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ exit
+
+interface vlan1
+ shutdown
+
+interface Vlan11
+ shutdown
+
+interface Vlan40
+ no shut
+
+interface Vlan56
+ no shut
+
+interface Vlan64
+ no shut
+
+interface Vlan66
+ no shut
+
+interface Vlan75
+ no shut
+
+interface Vlan93
+ ip address 10.10.93.5 255.255.255.240
+ no shut
+
+ip default-gateway 10.10.93.3
+
+line vty 0 4
+ login local
+ transport input ssh
+ exit
+end
+
+-----------------------------------------------------------------------------------
+
+ML-SW4:
+
+hostname ML-SW4
+
+ip routing
+
+username buzsak20 privilege 15 secret Titok2023
+username kkrisi privilege 15 secret Titok2023
+username zandras privilege 15 secret Titok2023
+
+ip ssh version 2
+ip domain-name kan.lan
+
+crypto key generate rsa general-keys modulus 1024
+
+vtp mode client
+vtp domain kan.lan
+vtp password thispasswordisasecret
+
+interface Ethernet 3/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet 3/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet3/2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ channel-protocol pagp
+ channel-group 2 mode desirable
+
+interface Ethernet3/3
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ channel-protocol pagp
+ channel-group 2 mode desirable
+
+interface Port-channel2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ exit
+
+interface vlan1
+ shutdown
+
+interface Vlan11
+ shutdown
+
+interface Vlan40
+ no shut
+
+interface Vlan56
+ no shut
+
+interface Vlan64
+ no shut
+
+interface Vlan66
+ no shut
+
+interface Vlan75
+ no shut
+
+interface Vlan93
+ ip address 10.10.93.5 255.255.255.240
+ no shut
+
+ip default-gateway 10.10.93.3
+
+line vty 0 4
+ login local
+ transport input ssh
+ exit
+end
+
+-----------------------------------------------------------------------------------
+
+SW1:
+
+hostname SW1
+
+ip routing
+
+username buzsak20 privilege 15 secret Titok2023
+username kkrisi privilege 15 secret Titok2023
+username zandras privilege 15 secret Titok2023
+
+ip ssh version 2
+ip domain-name kan.lan
+
+crypto key generate rsa general-keys modulus 1024
+
+vtp mode client
+vtp domain kan.lan
+vtp password thispasswordisasecret
+
+interface Ethernet 2/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet 2/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface vlan1
+ shutdown
+
+interface Vlan11
+ shutdown
+
+interface Vlan40
+ no shut
+
+interface Vlan56
+ no shut
+
+interface Vlan64
+ no shut
+
+interface Vlan66
+ shut
+
+interface Vlan75
+ no shut
+
+interface Vlan93
+ ip address 10.10.93.6 255.255.255.240
+ no shut
+
+ip default-gateway 10.10.93.3
+
+line vty 0 4
+ login local
+ transport input ssh
+ exit
+end
+
+-----------------------------------------------------------------------------------
+
+SW2:
+
+hostname SW2
+
+ip routing
+
+username buzsak20 privilege 15 secret Titok2023
+username kkrisi privilege 15 secret Titok2023
+username zandras privilege 15 secret Titok2023
+
+ip ssh version 2
+ip domain-name kan.lan
+
+crypto key generate rsa general-keys modulus 1024
+
+vtp mode client
+vtp domain kan.lan
+vtp password thispasswordisasecret
+
+interface Ethernet 2/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet 2/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface vlan1
+ shutdown
+
+interface Vlan11
+ shutdown
+
+interface Vlan40
+ no shut
+
+interface Vlan56
+ no shut
+
+interface Vlan64
+ no shut
+
+interface Vlan66
+ shut
+
+interface Vlan75
+ no shut
+
+interface Vlan93
+ ip address 10.10.93.7 255.255.255.240
+ no shut
+
+ip default-gateway 10.10.93.3
 
 line vty 0 4
  login local
