@@ -4,35 +4,62 @@ R1:
 
 hostname R1
 
+ip domain-lookup
+
 username buzsak20 privilege 15 secret Titok2023
 username kkrisi privilege 15 secret Titok2023
 username zandras privilege 15 secret Titok2023
 
+crypto isakmp policy 1
+ encr aes
+ authentication pre-share
+ group 5
+ lifetime 3600
+
+crypto isakmp key vpnciscokey address 193.41.4.2
+
+crypto ipsec transform-set VPN-SET esp-aes esp-sha-hmac
+
+crypto map VPN-MAP 1 ipsec-isakmp 
+ description VPN connection to Second Small Office R1
+ set peer 193.41.4.2
+ set transform-set VPN-SET 
+ match address VPN_Connection
+
 ip ssh version 2
 ip domain-name kan.lan
+ip name-server 10.10.40.5
+ip name-server 8.8.8.8
 
 crypto key generate rsa general-keys modulus 1024
 
 interface f0/0
- ip address dhcp
+ ip address 193.41.1.2 255.255.255.252
  ip nat outside
+ crypto map VPN-MAP
  no shut
 
 interface e1/0
+ no shutdown
+
+interface e1/0.56
  ip address 10.10.0.252 255.255.255.248
+ encapsulation dot1Q 56
  ip nat inside
  standby 1 ip 10.10.0.250
  standby 1 priority 150
  standby 1 preempt
  no shut
 
-ip route 10.10.93.0 255.255.255.240 10.10.0.251 
-ip route 10.10.76.0 255.255.255.248 10.10.0.251 
+ip route 10.10.93.0 255.255.255.240 10.10.0.251
 ip route 10.10.75.0 255.255.255.0 10.10.0.251 
 ip route 10.10.66.0 255.255.255.0 10.10.0.251 
 ip route 10.10.64.0 255.255.255.224 10.10.0.251 
 ip route 10.10.40.0 255.255.255.240 10.10.0.251 
+ip route 0.0.0.0 0.0.0.0 193.41.1.1
 
+ip access-list extended VPN_Connection
+ permit ip 10.10.0.248 0.0.0.7 10.30.0.252 0.0.0.3
 access-list 1 permit 10.10.40.0 0.0.0.15
 access-list 1 permit 10.10.66.0 0.0.0.255
 access-list 1 permit 10.10.75.0 0.0.0.255
@@ -40,18 +67,24 @@ access-list 1 permit 10.10.76.0 0.0.0.7
 
 ip nat inside source list 1 interface f0/0 overload
 
+line con 0
+ login local
+ logging synchronous
+
 line vty 0 4
  login local
  transport input ssh
+ logging synchronous
  exit
 
 end
-
 -----------------------------------------------------------------------------------
 
 R2:
 
 hostname R2
+
+ip domain-lookup
 
 username buzsak20 privilege 15 secret Titok2023
 username kkrisi privilege 15 secret Titok2023
@@ -59,22 +92,27 @@ username zandras privilege 15 secret Titok2023
 
 ip ssh version 2
 ip domain-name kan.lan
+ip name-server 10.10.40.5
+ip name-server 8.8.8.8
 
 crypto key generate rsa general-keys modulus 1024
 
+interface f0/0
+ ip address 193.41.2.2 255.255.255.252
+ ip nat outside
+ no shut
+
 interface e1/0
+ no shutdown
+
+interface e1/0.56
+ sencapsulation dot1Q 56
  ip address 10.10.0.254 255.255.255.248
  ip nat outside
  standby 1 ip 10.10.0.250
  no shut
 
-interface f0/0
- ip address dhcp
- ip nat outside
- no shut 
-
-ip route 10.10.93.0 255.255.255.240 10.10.0.253 
-ip route 10.10.76.0 255.255.255.248 10.10.0.253 
+ip route 10.10.93.0 255.255.255.240 10.10.0.253
 ip route 10.10.75.0 255.255.255.0 10.10.0.253 
 ip route 10.10.66.0 255.255.255.0 10.10.0.253 
 ip route 10.10.64.0 255.255.255.224 10.10.0.253 
@@ -87,9 +125,14 @@ access-list 1 permit 10.10.76.0 0.0.0.7
 
 ip nat inside source list 1 interface f0/0 overload
 
+line con 0
+ login local
+ logging synchronous
+
 line vty 0 4
  login local
  transport input ssh
+ logging synchronous
  exit
 
 end
@@ -145,8 +188,8 @@ vtp domain kan.lan
 vtp password thispasswordisasecret
 
 interface Ethernet0/0
-no shut
-exit
+ no shut
+ exit
 
 interface Ethernet 3/0
  switchport trunk encapsulation dot1q
@@ -179,7 +222,6 @@ interface Port-channel1
  exit
 
 interface vlan1
- ip address 10.10.0.251 255.255.255.248
  no shutdown
 
 interface Vlan11
@@ -196,7 +238,7 @@ interface Vlan40
  no shut
 
 interface Vlan56
- no ip address
+ ip address 10.10.0.251 255.255.255.248
  no shut
 
 interface Vlan64
@@ -240,13 +282,45 @@ interface Vlan93
 
 ip default-gateway 10.10.0.250
 
-ip route 0.0.0.0 0.0.0.0 10.10.0.250 
+ip route 0.0.0.0 0.0.0.0 10.10.0.250
+
+ip access-list extended VLAN75_ACCESS
+ permit ip 10.10.75.0 0.0.0.255 10.10.64.0 0.0.0.31
+ permit ip 10.10.75.0 0.0.0.255 10.10.40.0 0.0.0.15
+ permit ip 10.10.75.0 0.0.0.255 10.10.0.248 0.0.0.7
+ permit tcp 10.10.75.0 0.0.0.255 any eq www
+ permit tcp 10.10.75.0 0.0.0.255 any eq 443
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended VLAN66_ACCESS
+ permit ip 10.10.66.0 0.0.0.255 10.10.40.0 0.0.0.15
+ permit ip 10.10.66.0 0.0.0.255 10.10.0.248 0.0.0.7
+ permit tcp 10.10.66.0 0.0.0.255 any eq www
+ permit tcp 10.10.66.0 0.0.0.255 any eq 443
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended VLAN64_ACCESS
+ permit ip 10.10.64.0 0.0.0.31 10.10.40.0 0.0.0.15
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended SSH_ACCESS
+ permit ip host 10.10.40.4 any
+ permit ip host 10.10.40.5 any
+ permit ip host 10.10.40.6 any
+ permit ip host 10.10.40.7 any
+
+line con 0
+ login local
+ logging synchronous
 
 line vty 0 4
  login local
  transport input ssh
+ logging synchronous
  exit
-end
 
 -----------------------------------------------------------------------------------
 
@@ -299,8 +373,8 @@ vtp domain kan.lan
 vtp password thispasswordisasecret
 
 interface Ethernet0/0
-no shut
-exit
+ no shut
+ exit
 
 interface Ethernet 3/0
  switchport trunk encapsulation dot1q
@@ -333,7 +407,6 @@ interface Port-channel1
  exit
 
 interface vlan1
- ip address 10.10.0.253 255.255.255.248
  no shutdown
 
 interface Vlan11
@@ -349,7 +422,7 @@ interface Vlan40
  no shut
 
 interface Vlan56
- no ip address
+ ip address 10.10.0.253 255.255.255.248
  no shut
 
 interface Vlan64
@@ -388,13 +461,45 @@ interface Vlan93
 
 ip default-gateway 10.10.0.250
 
-ip route 0.0.0.0 0.0.0.0 10.10.0.250 
+ip route 0.0.0.0 0.0.0.0 10.10.0.250
+
+ip access-list extended VLAN75_ACCESS
+ permit ip 10.10.75.0 0.0.0.255 10.10.64.0 0.0.0.31
+ permit ip 10.10.75.0 0.0.0.255 10.10.40.0 0.0.0.15
+ permit ip 10.10.75.0 0.0.0.255 10.10.0.248 0.0.0.7
+ permit tcp 10.10.75.0 0.0.0.255 any eq www
+ permit tcp 10.10.75.0 0.0.0.255 any eq 443
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended VLAN66_ACCESS
+ permit ip 10.10.66.0 0.0.0.255 10.10.40.0 0.0.0.15
+ permit ip 10.10.66.0 0.0.0.255 10.10.0.248 0.0.0.7
+ permit tcp 10.10.66.0 0.0.0.255 any eq www
+ permit tcp 10.10.66.0 0.0.0.255 any eq 443
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended VLAN64_ACCESS
+ permit ip 10.10.64.0 0.0.0.31 10.10.40.0 0.0.0.15
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended SSH_ACCESS
+ permit ip host 10.10.40.4 any
+ permit ip host 10.10.40.5 any
+ permit ip host 10.10.40.6 any
+ permit ip host 10.10.40.7 any
+
+line con 0
+ login local
+ logging synchronous
 
 line vty 0 4
  login local
  transport input ssh
+ logging synchronous
  exit
-end
 
 -----------------------------------------------------------------------------------
 
@@ -474,11 +579,15 @@ interface Vlan93
 
 ip default-gateway 10.10.93.3
 
+line con 0
+ login local
+ logging synchronous
+
 line vty 0 4
  login local
  transport input ssh
+ logging synchronous
  exit
-end
 
 -----------------------------------------------------------------------------------
 
@@ -558,19 +667,21 @@ interface Vlan93
 
 ip default-gateway 10.10.93.3
 
+line con 0
+ login local
+ logging synchronous
+
 line vty 0 4
  login local
  transport input ssh
+ logging synchronous
  exit
-end
 
 -----------------------------------------------------------------------------------
 
 SW1:
 
 hostname SW1
-
-ip routing
 
 username buzsak20 privilege 15 secret Titok2023
 username kkrisi privilege 15 secret Titok2023
@@ -622,19 +733,21 @@ interface Vlan93
 
 ip default-gateway 10.10.93.3
 
+line con 0
+ login local
+ logging synchronous
+
 line vty 0 4
  login local
  transport input ssh
+ logging synchronous
  exit
-end
 
 -----------------------------------------------------------------------------------
 
 SW2:
 
 hostname SW2
-
-ip routing
 
 username buzsak20 privilege 15 secret Titok2023
 username kkrisi privilege 15 secret Titok2023
@@ -686,9 +799,748 @@ interface Vlan93
 
 ip default-gateway 10.10.93.3
 
+line con 0
+ login local
+ logging synchronous
+
 line vty 0 4
  login local
  transport input ssh
+ logging synchronous
+ exit
+
+-----------------------------------------------------------------------------------
+
+__Második telephely eszköz konfiguráció__
+
+
+
+
+__Harmadik telephely eszköz konfiguráció__
+
+R1:
+
+hostname R1
+
+ip domain-lookup
+
+username buzsak20 privilege 15 secret Titok2023
+username kkrisi privilege 15 secret Titok2023
+username zandras privilege 15 secret Titok2023
+
+!license boot module c2900 technology-package securityk9
+
+crypto isakmp policy 1
+ encr aes
+ authentication pre-share
+ group 5
+ lifetime 3600
+
+crypto isakmp key vpnciscokey address 193.41.1.2
+
+crypto ipsec transform-set VPN-SET esp-aes esp-sha-hmac
+
+crypto map VPN-MAP 1 ipsec-isakmp 
+ description VPN connection to Main Office R1
+ set peer 193.41.1.2
+ set transform-set VPN-SET
+ match address VPN_Connection
+
+ip ssh version 2
+ip domain-name kan.lan
+ip name-server 10.30.40.3
+ip name-server 8.8.8.8
+
+crypto key generate rsa general-keys modulus 1024
+
+interface FastEthernet0/0
+ ip address 193.41.4.2 255.255.255.252
+ ip nat outside
+ crypto map VPN-MAP
+ no shutdown
+
+interface Ethernet1/0
+ no shutdown
+
+interface Ethernet1/0.56
+ encapsulation dot1Q 56
+ ip address 10.30.0.254 255.255.255.252
+ ip nat inside
+ no shutdown
+
+interface Ethernet1/1
+ no ip address
+ shutdown
+
+interface Ethernet1/2
+ no ip address
+ shutdown
+
+interface Ethernet1/3
+ no ip address
+ shutdown
+
+ip access-list extended VPN_Connection
+ permit ip 10.30.0.252 0.0.0.3 10.10.0.248 0.0.0.7
+access-list 1 permit 10.30.40.0 0.0.0.7
+access-list 1 permit 10.30.66.0 0.0.0.255
+access-list 1 permit 10.30.75.0 0.0.0.255
+
+ip route 10.30.40.0 255.255.255.248 10.30.0.253
+ip route 10.30.64.0 255.255.255.224 10.30.0.253
+ip route 10.30.66.0 255.255.255.0 10.30.0.253
+ip route 10.30.75.0 255.255.255.0 10.30.0.253
+ip route 10.30.93.0 255.255.255.240 10.30.0.253
+ip route 0.0.0.0 0.0.0.0 193.41.4.1
+
+ip nat inside source list 1 interface FastEthernet0/0 overload
+
+line con 0
+ login local
+ logging synchronous
+
+line vty 0 4
+ login local
+ transport input ssh
+ exit
+
+-----------------------------------------------------------------------------------
+
+ML-SW1:
+
+hostname ML-SW1
+
+ip domain-name kan.lan
+
+ip routing
+
+interface Ethernet0/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+
+interface Ethernet0/1
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 56
+ switchport mode trunk
+
+interface Ethernet0/2
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 56
+ switchport mode trunk
+
+interface Ethernet0/3
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet1/0
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet1/1
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet1/2
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet1/3
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet2/0
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet2/1
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet2/2
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet2/3
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet3/0
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet3/1
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet3/2
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet3/3
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet4/0
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet4/1
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet4/2
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet4/3
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet5/0
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet5/1
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet5/2
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet5/3
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Vlan1
+ no ip address
+ shutdown
+
+interface Vlan40
+ ip address 10.30.40.1 255.255.255.240
+ no shutdown
+
+interface Vlan56
+ ip address 10.30.0.253 255.255.255.252
+ no shutdown
+
+interface Vlan64
+ ip address 10.30.64.1 255.255.255.224
+ no shutdown
+
+interface Vlan66
+ ip address 10.30.66.1 255.255.255.0
+ ip helper-address 10.30.40.2
+ no shutdown
+
+interface Vlan75
+ ip address 10.30.75.1 255.255.255.0
+ ip helper-address 10.30.40.2
+ no shutdown
+
+interface Vlan93
+ ip address 10.30.93.1 255.255.255.240
+ no shutdown
+
+ip access-list extended VLAN75_ACCESS
+ permit ip 10.30.75.0 0.0.0.255 10.30.64.0 0.0.0.31
+ permit ip 10.30.75.0 0.0.0.255 10.30.40.0 0.0.0.7
+ permit ip 10.30.75.0 0.0.0.255 10.30.0.252 0.0.0.2
+ permit tcp 10.30.75.0 0.0.0.255 any eq www
+ permit tcp 10.30.75.0 0.0.0.255 any eq 443
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended VLAN66_ACCESS
+ permit ip 10.30.66.0 0.0.0.255 10.30.40.0 0.0.0.7
+ permit ip 10.30.66.0 0.0.0.255 10.30.0.252 0.0.0.2
+ permit tcp 10.30.66.0 0.0.0.255 any eq www
+ permit tcp 10.30.66.0 0.0.0.255 any eq 443
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended VLAN64_ACCESS
+ permit ip 10.30.66.0 0.0.0.255 10.30.40.0 0.0.0.7
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+ip access-list extended SSH_ACCESS
+ permit ip host 10.30.40.2 any
+ permit ip host 10.30.40.3 any
+
+ip route 0.0.0.0 0.0.0.0 10.30.0.254
+
+line con 0
+ login local
+ logging synchronous
+
+line vty 0 4
+ login local
+ transport input ssh
+ logging synchronous
+ ip access-group SSH_ACCESS
+ exit
+end
+
+-----------------------------------------------------------------------------------
+
+SW1:
+
+hostname SW1
+
+username buzsak20 privilege 15 secret Titok2023
+username kkrisi privilege 15 secret Titok2023
+username zandras privilege 15 secret Titok2023
+
+ip ssh version 2
+ip domain-name kan.lan
+
+crypto key generate rsa general-keys modulus 1024
+
+vtp mode client
+vtp domain kan.lan
+vtp password thispasswordisasecret
+
+interface Ethernet0/0
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet0/1
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 56
+ switchport mode trunk
+
+interface Ethernet0/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/0
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet1/1
+ switchport access vlan 40
+ switchport mode access
+ duplex auto
+
+interface Ethernet1/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet2/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet2/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet2/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet2/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet3/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet3/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet3/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet3/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/0
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet4/1
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet4/2
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet4/3
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet5/0
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet5/1
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet5/2
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet5/3
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Vlan1
+ no ip address
+ shutdown
+
+interface Vlan11
+ no ip address
+ shutdown
+
+interface Vlan40
+ no ip address
+
+interface Vlan66
+ no ip address
+
+interface Vlan75
+ no ip address
+
+interface Vlan93
+ ip address 10.30.93.2 255.255.255.240
+
+ip default-gateway 10.30.93.1
+
+line con 0
+ login local
+ logging synchronous
+
+line vty 0 4
+ login local
+ transport input ssh
+ logging synchronous
+ exit
+end
+
+-----------------------------------------------------------------------------------
+
+SW2:
+
+hostname SW2
+
+username buzsak20 privilege 15 secret Titok2023
+username kkrisi privilege 15 secret Titok2023
+username zandras privilege 15 secret Titok2023
+
+ip ssh version 2
+ip domain-name kan.lan
+
+crypto key generate rsa general-keys modulus 1024
+
+vtp mode client
+vtp domain kan.lan
+vtp password thispasswordisasecret
+
+interface Ethernet0/0
+ switchport mode access
+ switchport access vlan 11
+ shutdown
+
+interface Ethernet0/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/2
+ switchport trunk encapsulation dot1q
+ switchport trunk native vlan 56
+ switchport mode trunk
+
+interface Ethernet0/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/0
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet1/1
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet1/2
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet1/3
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet2/0
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet2/1
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet2/2
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet2/3
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet3/0
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet3/1
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet3/2
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet3/3
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet4/0
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet4/1
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet4/2
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet4/3
+ switchport access vlan 40
+ switchport mode access
+
+interface Ethernet5/0
+ switchport access vlan 64
+ switchport mode access
+
+interface Ethernet5/1
+ switchport access vlan 64
+ switchport mode access
+
+interface Ethernet5/2
+ switchport access vlan 64
+ switchport mode access
+
+interface Ethernet5/3
+ switchport access vlan 64
+ switchport mode access
+
+interface Ethernet6/0
+ switchport access vlan 64
+ switchport mode access
+
+interface Ethernet6/1
+ switchport access vlan 64
+ switchport mode access
+
+interface Ethernet6/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet6/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet7/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet7/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet7/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet7/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet8/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet8/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet8/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet8/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet9/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet9/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet9/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet9/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet10/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet10/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet10/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet10/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet11/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet11/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet11/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet11/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Vlan1
+ no ip address
+ shutdown
+
+interface Vlan11
+ no ip address
+ shutdown
+
+interface Vlan40
+ no ip address
+
+interface Vlan66
+ no ip address
+
+interface Vlan75
+ no ip address
+
+interface Vlan93
+ ip address 10.30.93.3 255.255.255.240
+
+ip default-gateway 10.30.93.1
+
+line con 0
+ login local
+ logging synchronous
+
+line vty 0 4
+ login local
+ transport input ssh
+ logging synchronous
  exit
 end
 
