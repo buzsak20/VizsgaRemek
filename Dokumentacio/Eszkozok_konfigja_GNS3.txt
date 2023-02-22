@@ -51,8 +51,18 @@ interface e1/0.56
  standby 1 preempt
  no shut
 
+interface e1/1
+ shutdown
+
+interface e1/2
+ no shutdown
+
+interface e1/3
+ no shutdown
+
 ip route 10.10.93.0 255.255.255.240 10.10.0.251
-ip route 10.10.75.0 255.255.255.0 10.10.0.251 
+ip route 10.10.76.0 255.255.255.224 10.10.0.251
+ip route 10.10.75.0 255.255.255.0 10.10.0.251  
 ip route 10.10.66.0 255.255.255.0 10.10.0.251 
 ip route 10.10.64.0 255.255.255.224 10.10.0.251 
 ip route 10.10.40.0 255.255.255.240 10.10.0.251 
@@ -63,7 +73,7 @@ ip access-list extended VPN_Connection
 access-list 1 permit 10.10.40.0 0.0.0.15
 access-list 1 permit 10.10.66.0 0.0.0.255
 access-list 1 permit 10.10.75.0 0.0.0.255
-access-list 1 permit 10.10.76.0 0.0.0.7
+access-list 1 permit 10.10.76.0 0.0.0.31
 
 ip nat inside source list 1 interface f0/0 overload
 
@@ -112,7 +122,17 @@ interface e1/0.56
  standby 1 ip 10.10.0.250
  no shut
 
+interface e1/1
+ shutdown
+
+interface e1/2
+ no shutdown
+
+interface e1/3
+ no shutdown
+
 ip route 10.10.93.0 255.255.255.240 10.10.0.253
+ip route 10.10.76.0 255.255.255.224 10.10.0.253
 ip route 10.10.75.0 255.255.255.0 10.10.0.253 
 ip route 10.10.66.0 255.255.255.0 10.10.0.253 
 ip route 10.10.64.0 255.255.255.224 10.10.0.253 
@@ -179,6 +199,10 @@ vlan 75
  name Office
  exit
 
+vlan 76
+ name Ports
+ exit
+
 vlan 93
  name Supervise
  exit
@@ -187,9 +211,70 @@ vtp mode server
 vtp domain kan.lan
 vtp password thispasswordisasecret
 
-interface Ethernet0/0
- no shut
+interface Port-channel1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
  exit
+
+interface Ethernet0/0
+ no shutdown
+ exit
+
+interface Ethernet0/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/0
+ switchport access vlan 66
+ switchport mode access
+ no shutdown
+
+interface Ethernet1/1
+ switchport access vlan 66
+ switchport mode access
+ no shutdown
+
+interface Ethernet1/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet 2/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet 2/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet2/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet2/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
 
 interface Ethernet 3/0
  switchport trunk encapsulation dot1q
@@ -215,11 +300,45 @@ interface Ethernet3/3
  channel-protocol pagp
  channel-group 1 mode desirable
 
-interface Port-channel1
- switchport trunk encapsulation dot1q
- switchport mode trunk
- switchport trunk native vlan 56
- exit
+interface Ethernet4/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
 
 interface vlan1
  no shutdown
@@ -270,6 +389,16 @@ interface Vlan75
  standby 75 preempt
  no shut
 
+interface Vlan76
+ ip address 10.10.76.1 255.255.255.224
+ ip helper-address 10.10.40.4
+ standby version 2
+ standby 76 timers 5 10
+ standby 76 ip 10.10.76.3
+ standby 76 priority 150
+ standby 76 preempt
+ no shut
+
 interface Vlan93
  ip address 10.10.93.1 255.255.255.240
  standby version 2
@@ -283,6 +412,14 @@ interface Vlan93
 ip default-gateway 10.10.0.250
 
 ip route 0.0.0.0 0.0.0.0 10.10.0.250
+
+ip access-list extended VLAN76_ACCESS
+ permit ip 10.10.76.0 0.0.0.255 10.10.40.0 0.0.0.15
+ permit ip 10.10.76.0 0.0.0.255 10.10.0.248 0.0.0.7
+ permit tcp 10.10.76.0 0.0.0.255 any eq www
+ permit tcp 10.10.76.0 0.0.0.255 any eq 443
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
 
 ip access-list extended VLAN75_ACCESS
  permit ip 10.10.75.0 0.0.0.255 10.10.64.0 0.0.0.31
@@ -364,6 +501,10 @@ vlan 75
  name Office
  exit
 
+vlan 76
+ name Ports
+ exit
+
 vlan 93
  name Supervise
  exit
@@ -372,9 +513,70 @@ vtp mode server
 vtp domain kan.lan
 vtp password thispasswordisasecret
 
-interface Ethernet0/0
- no shut
+interface Port-channel1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
  exit
+
+interface Ethernet0/0
+ no shutdown
+ exit
+
+interface Ethernet0/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/0
+ switchport access vlan 66
+ switchport mode access
+ no shutdown
+
+interface Ethernet1/1
+ switchport access vlan 66
+ switchport mode access
+ no shutdown
+
+interface Ethernet1/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet 2/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet 2/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+
+interface Ethernet2/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet2/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
 
 interface Ethernet 3/0
  switchport trunk encapsulation dot1q
@@ -400,11 +602,45 @@ interface Ethernet3/3
  channel-protocol pagp
  channel-group 1 mode desirable
 
-interface Port-channel1
- switchport trunk encapsulation dot1q
- switchport mode trunk
- switchport trunk native vlan 56
- exit
+interface Ethernet4/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
 
 interface vlan1
  no shutdown
@@ -451,6 +687,16 @@ interface Vlan75
  standby 75 priority 100
  no shut
 
+interface Vlan76
+ ip address 10.10.76.2 255.255.255.224
+ ip helper-address 10.10.40.4
+ standby version 2
+ standby 76 timers 5 10
+ standby 76 ip 10.10.76.3
+ standby 76 priority 150
+ standby 76 preempt
+ no shut
+
 interface Vlan93
  ip address 10.10.93.2 255.255.255.240
  standby version 2
@@ -462,6 +708,14 @@ interface Vlan93
 ip default-gateway 10.10.0.250
 
 ip route 0.0.0.0 0.0.0.0 10.10.0.250
+
+ip access-list extended VLAN76_ACCESS
+ permit ip 10.10.76.0 0.0.0.255 10.10.40.0 0.0.0.15
+ permit ip 10.10.76.0 0.0.0.255 10.10.0.248 0.0.0.7
+ permit tcp 10.10.76.0 0.0.0.255 any eq www
+ permit tcp 10.10.76.0 0.0.0.255 any eq 443
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
 
 ip access-list extended VLAN75_ACCESS
  permit ip 10.10.75.0 0.0.0.255 10.10.64.0 0.0.0.31
@@ -522,6 +776,72 @@ vtp mode client
 vtp domain kan.lan
 vtp password thispasswordisasecret
 
+interface Port-channel2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ exit
+
+interface Ethernet0/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet 2/0
+ switchport access vlan 40
+ switchport mode access
+ no shutdown
+
+interface Ethernet 2/1
+ switchport access vlan 40
+ switchport mode access
+ no shutdown
+
+interface Ethernet2/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet2/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
 interface Ethernet 3/0
  switchport trunk encapsulation dot1q
  switchport mode trunk
@@ -537,20 +857,54 @@ interface Ethernet3/2
  switchport mode trunk
  switchport trunk native vlan 56
  channel-protocol pagp
- channel-group 2 mode desirable
+ channel-group 1 mode desirable
 
 interface Ethernet3/3
  switchport trunk encapsulation dot1q
  switchport mode trunk
  switchport trunk native vlan 56
  channel-protocol pagp
- channel-group 2 mode desirable
+ channel-group 1 mode desirable
 
-interface Port-channel2
- switchport trunk encapsulation dot1q
- switchport mode trunk
- switchport trunk native vlan 56
- exit
+interface Ethernet4/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
 
 interface vlan1
  shutdown
@@ -571,6 +925,9 @@ interface Vlan66
  no shut
 
 interface Vlan75
+ no shut
+
+interface Vlan76
  no shut
 
 interface Vlan93
@@ -610,6 +967,72 @@ vtp mode client
 vtp domain kan.lan
 vtp password thispasswordisasecret
 
+interface Port-channel2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ exit
+
+interface Ethernet0/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet 2/0
+ switchport access vlan 40
+ switchport mode access
+ no shutdown
+
+interface Ethernet 2/1
+ switchport access vlan 40
+ switchport mode access
+ no shutdown
+
+interface Ethernet2/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet2/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
 interface Ethernet 3/0
  switchport trunk encapsulation dot1q
  switchport mode trunk
@@ -625,20 +1048,54 @@ interface Ethernet3/2
  switchport mode trunk
  switchport trunk native vlan 56
  channel-protocol pagp
- channel-group 2 mode desirable
+ channel-group 1 mode desirable
 
 interface Ethernet3/3
  switchport trunk encapsulation dot1q
  switchport mode trunk
  switchport trunk native vlan 56
  channel-protocol pagp
- channel-group 2 mode desirable
+ channel-group 1 mode desirable
 
-interface Port-channel2
- switchport trunk encapsulation dot1q
- switchport mode trunk
- switchport trunk native vlan 56
- exit
+interface Ethernet4/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
 
 interface vlan1
  shutdown
@@ -659,6 +1116,9 @@ interface Vlan66
  no shut
 
 interface Vlan75
+ no shut
+
+interface Vlan76
  no shut
 
 interface Vlan93
@@ -696,15 +1156,245 @@ vtp mode client
 vtp domain kan.lan
 vtp password thispasswordisasecret
 
-interface Ethernet 2/0
+interface Ethernet 0/0
  switchport trunk encapsulation dot1q
  switchport mode trunk
  switchport trunk native vlan 56
 
-interface Ethernet 2/1
+interface Ethernet 0/1
  switchport trunk encapsulation dot1q
  switchport mode trunk
  switchport trunk native vlan 56
+
+interface Ethernet0/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/0
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet1/1
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet1/2
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet1/3
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet 2/0
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet 2/1
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet2/2
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet2/3
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet 3/0
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet 3/1
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet3/2
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet3/3
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet4/0
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet4/1
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet4/2
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet4/3
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet5/0
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet5/1
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet5/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet6/0
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet6/1
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet6/2
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet6/3
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet7/0
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet7/1
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet7/2
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet7/3
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet8/0
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet8/1
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet8/2
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet8/3
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet9/0
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet9/1
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet9/2
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet9/3
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet10/0
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet10/1
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet10/2
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet10/3
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet11/0
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet11/1
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet11/2
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet11/3
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
 
 interface vlan1
  shutdown
@@ -725,6 +1415,9 @@ interface Vlan66
  shut
 
 interface Vlan75
+ no shut
+
+interface Vlan76
  no shut
 
 interface Vlan93
@@ -762,15 +1455,245 @@ vtp mode client
 vtp domain kan.lan
 vtp password thispasswordisasecret
 
-interface Ethernet 2/0
+interface Ethernet 0/0
  switchport trunk encapsulation dot1q
  switchport mode trunk
  switchport trunk native vlan 56
 
-interface Ethernet 2/1
+interface Ethernet 0/1
  switchport trunk encapsulation dot1q
  switchport mode trunk
  switchport trunk native vlan 56
+
+interface Ethernet0/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/0
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet1/1
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet1/2
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet1/3
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet 2/0
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet 2/1
+ switchport access vlan 75
+ switchport mode access
+ no shutdown
+
+interface Ethernet2/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet2/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet 3/0
+ switchport access vlan 64
+ switchport mode access
+ no shutdown
+
+interface Ethernet 3/1
+ switchport access vlan 64
+ switchport mode access
+ no shutdown
+
+interface Ethernet3/2
+ switchport access vlan 64
+ switchport mode access
+ no shutdown
+
+interface Ethernet3/3
+ switchport access vlan 64
+ switchport mode access
+ no shutdown
+
+interface Ethernet4/0
+ switchport access vlan 64
+ switchport mode access
+ no shutdown
+
+interface Ethernet4/1
+ switchport access vlan 64
+ switchport mode access
+ no shutdown
+
+interface Ethernet4/2
+ switchport access vlan 64
+ switchport mode access
+ no shutdown
+
+interface Ethernet4/3
+ switchport access vlan 64
+ switchport mode access
+ no shutdown
+
+interface Ethernet5/0
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet5/1
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet5/2
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet5/3
+ switchport access vlan 76
+ switchport mode access
+ no shutdown
+
+interface Ethernet6/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet6/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet6/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet6/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet7/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet7/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet7/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet7/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet8/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet8/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet8/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet8/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet9/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet9/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet9/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet9/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet10/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet10/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet10/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet10/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet11/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet11/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet11/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet11/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
 
 interface vlan1
  shutdown
@@ -791,6 +1714,9 @@ interface Vlan66
  shut
 
 interface Vlan75
+ no shut
+
+interface Vlan76
  no shut
 
 interface Vlan93
@@ -1316,58 +2242,114 @@ interface Ethernet0/3
 interface Ethernet1/0
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet1/1
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet1/2
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet1/3
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet2/0
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet2/1
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet2/2
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet2/3
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet3/0
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet3/1
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet3/2
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet3/3
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet4/0
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet4/1
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet4/2
  switchport access vlan 40
@@ -1376,30 +2358,58 @@ interface Ethernet4/2
 interface Ethernet4/3
  switchport access vlan 40
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet5/0
  switchport access vlan 64
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet5/1
  switchport access vlan 64
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet5/2
  switchport access vlan 64
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet5/3
  switchport access vlan 64
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet6/0
  switchport access vlan 64
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet6/1
  switchport access vlan 64
  switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
 
 interface Ethernet6/2
  switchport access vlan 11
