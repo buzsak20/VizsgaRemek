@@ -1,4 +1,4 @@
-https://www.timigate.com/2018/04/how-to-configure-site-to-site-ipsec-vpn-2.html
+https://www.cisco.com/c/en/us/td/docs/security/asa/asa72/configuration/guide/conf_gd/l2tp_ips.html
 
 vpnciscokey
 
