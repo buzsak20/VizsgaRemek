@@ -3001,6 +3001,7 @@ ip route 10.30.66.0 255.255.255.0 10.30.0.253
 ip route 10.30.75.0 255.255.255.0 10.30.0.253
 ip route 10.30.93.0 255.255.255.240 10.30.0.253
 ip route 0.0.0.0 0.0.0.0 193.41.4.1
+ip route 192.168.122.0 255.255.255.0 192.168.1.254
 
 ip nat inside source list 1 interface FastEthernet0/0 overload
 
@@ -3033,6 +3034,8 @@ hostname Coleton-ML-SW1
 
 ip routing
 ip domain-name kan.lan
+ip name-server 10.30.40.3
+ip ssh version 2
 
 enable secret Titok2023
 username buzsak20 privilege 15 secret Titok2023
@@ -3292,12 +3295,38 @@ username zandras privilege 15 secret Titok2023
 
 ip ssh version 2
 ip domain-name kan.lan
+ip name-server 10.30.40.3
 
 crypto key generate rsa general-keys modulus 1024
 
 vtp mode client
 vtp domain kan.lan
 vtp password thispasswordisasecret
+
+interface Vlan1
+ no ip address
+ shutdown
+
+interface Vlan11
+ no ip address
+ shutdown
+
+interface Vlan40
+ no ip address
+ no shutdowndown
+
+interface Vlan66
+ no ip address
+ no shutdowndown
+
+interface Vlan75
+ no ip address
+ no shutdowndown
+
+interface Vlan93
+ ip address 10.30.93.2 255.255.255.240
+ no shutdowndown
+
 
 interface Ethernet0/0
  switchport mode access
@@ -3428,30 +3457,6 @@ interface Ethernet5/3
  switchport access vlan 11
  shutdown
 
-interface Vlan1
- no ip address
- shutdown
-
-interface Vlan11
- no ip address
- shutdown
-
-interface Vlan40
- no ip address
- no shutdowndown
-
-interface Vlan66
- no ip address
- no shutdowndown
-
-interface Vlan75
- no ip address
- no shutdowndown
-
-interface Vlan93
- ip address 10.30.93.2 255.255.255.240
- no shutdowndown
-
 ip default-gateway 10.30.93.1
 
 banner motd Q
@@ -3490,12 +3495,37 @@ username zandras privilege 15 secret Titok2023
 
 ip ssh version 2
 ip domain-name kan.lan
+ip name-server 10.30.40.3
 
 crypto key generate rsa general-keys modulus 1024
 
 vtp mode client
 vtp domain kan.lan
 vtp password thispasswordisasecret
+
+interface Vlan1
+ no ip address
+ shutdown
+
+interface Vlan11
+ no ip address
+ shutdown
+
+interface Vlan40
+ no ip address
+ no shutdown
+
+interface Vlan66
+ no ip address
+ no shutdown
+
+interface Vlan75
+ no ip address
+ no shutdown
+
+interface Vlan93
+ ip address 10.30.93.3 255.255.255.240
+ no shutdown
 
 interface Ethernet0/0
  switchport mode access
@@ -3825,30 +3855,6 @@ interface Ethernet11/3
  switchport access vlan 11
  switchport mode access
  shutdown
-
-interface Vlan1
- no ip address
- shutdown
-
-interface Vlan11
- no ip address
- shutdown
-
-interface Vlan40
- no ip address
- no shutdown
-
-interface Vlan66
- no ip address
- no shutdown
-
-interface Vlan75
- no ip address
- no shutdown
-
-interface Vlan93
- ip address 10.30.93.3 255.255.255.240
- no shutdown
 
 ip default-gateway 10.30.93.1
 
