@@ -2186,8 +2186,7 @@ hostname Blesston-R1
 ipv6 unicast-routing
 ip domain-lookup
 ip ssh version 2
-ip domain-name kan.lan
-ip name-server 10.30.40.3
+ip domain-name kan.lan 
 ip name-server 192.168.122.1
 
 enable secret Titok2023
@@ -2210,11 +2209,7 @@ interface FastEthernet0/0
  no shutdown
 
 interface Ethernet1/0
- no shutdown
-
-interface Ethernet1/0.56
- encapsulation dot1Q 56
- ip address 10.20.0.254 255.255.255.252
+ ip address 10.20.0.254 255.255.255.248
  ipv6 address 2001:DB8:20::1/64
  ip nat inside
  no shutdown
@@ -2245,6 +2240,9 @@ ip route 10.20.66.0 255.255.255.0 10.20.0.253
 ip route 10.20.75.0 255.255.255.0 10.20.0.253
 ip route 10.20.93.0 255.255.255.240 10.20.0.253
 ip route 0.0.0.0 0.0.0.0 193.41.3.1
+ip route 192.168.122.0 255.255.255.0 192.168.122.253
+ip nat inside source static tcp 10.20.0.252 80 192.168.122.254 80 extendable példa
+
 
 ip nat inside source list 1 interface FastEthernet0/0 overload
 
@@ -2271,7 +2269,131 @@ line vty 0 4
 
 -----------------------------------------------------------------------------------
 
-Blesston-Firewall:
+Blesston-Firewall: Példa egyelőre!!!
+
+hostname Blesston-Firewall
+
+interface Ethernet0/0
+nameif outside
+security-level 0
+ip address 198.51.100.100 255.255.255.0
+!
+interface Ethernet0/1
+nameif inside
+security-level 100
+ip address 192.168.0.1 255.255.255.0
+!
+interface Ethernet0/2
+nameif dmz
+security-level 50
+ip address 192.168.1.1 255.255.255.0
+!
+route outside 0.0.0.0 0.0.0.0 198.51.100.1
+
+object network inside-subnet
+subnet 192.168.0.0 255.255.255.0
+nat (inside,outside) dynamic interface
+!
+object network dmz-subnet
+subnet 192.168.1.0 255.255.255.0
+nat (dmz,outside) dynamic interface
+
+object network webserver-external-ip
+host 198.51.100.101
+!
+object network webserver
+host 192.168.1.100
+nat (dmz,outside) static webserver-external-ip service tcp www www
+
+access-list outside_acl extended permit tcp any object webserver eq www
+!
+access-group outside_acl in interface outside
+
+object network dns-server
+host 192.168.0.53
+!
+access-list dmz_acl extended permit udp any object dns-server eq domain
+access-list dmz_acl extended deny ip any object inside-subnet
+access-list dmz_acl extended permit ip any any
+!
+access-group dmz_acl in interface dmz
+
+
+------
+NAT 80-as port
+
+object network webserver-external-ip
+host 10.20.0.252
+!
+object network webserver
+host 10.20.2.253
+nat (DMZ1,OUTSIDE) static webserver-external-ip service tcp www www
+
+access-list outside_acl extended permit tcp any object webserver eq www
+!
+access-group outside_acl in interface outside
+
+NAT inside to outside
+
+object network inside-subnet
+subnet 192.168.0.0 255.255.255.0
+nat (inside,outside) dynamic interface
+
+NAT dmz to outside
+
+object network dmz-subnet
+subnet 192.168.1.0 255.255.255.0
+nat (dmz,outside) dynamic interface
+
+policy-map global_policy
+class inspection_default
+inspect icmp
+
+object network dns-server
+host 192.168.0.53
+!
+access-list dmz_acl extended permit udp any object dns-server eq domain
+access-list dmz_acl extended deny ip any object inside-subnet
+access-list dmz_acl extended permit ip any any
+!
+access-group dmz_acl in interface dmz
+
+
+int g0/0
+
+nameif OUTSIDE
+
+ip add 10.20.0.253 255.255.255.248
+
+no shut
+
+int g0/1.56
+
+vlan 56
+
+nameif INSIDE
+
+ip add 10.20.1.254 255.255.255.252
+
+int g0/2
+
+nameif DMZ1
+
+security-level 50
+
+ip add 10.20.2.254 255.255.255.252
+
+no shut
+
+int g0/3
+
+nameif DMZ2
+
+security-level 50
+
+ip add 10.20.3.254 255.255.255.252
+
+no shut
 
 
 
