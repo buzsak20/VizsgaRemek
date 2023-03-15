@@ -71,7 +71,6 @@ ip route 10.10.66.0 255.255.255.0 10.10.0.251
 ip route 10.10.64.0 255.255.255.224 10.10.0.251 
 ip route 10.10.40.0 255.255.255.240 10.10.0.251 
 ip route 0.0.0.0 0.0.0.0 193.41.1.1
-ip route 192.168.122.0 255.255.255.0 192.168.122.254
 
 ip access-list extended VPN_Connection
  permit ip 10.10.0.248 0.0.0.7 10.30.0.252 0.0.0.3
@@ -145,7 +144,7 @@ interface e1/0.56
  encapsulation dot1Q 56
  ip address 10.10.0.254 255.255.255.248
  ipv6 address 2001:DB8:10::1/64
- ip nat outside
+ ip nat inside
  standby 1 ip 10.10.0.250
  no shutdown
 
@@ -167,9 +166,7 @@ ip route 10.10.76.0 255.255.255.224 10.10.0.253
 ip route 10.10.75.0 255.255.255.0 10.10.0.253 
 ip route 10.10.66.0 255.255.255.0 10.10.0.253 
 ip route 10.10.64.0 255.255.255.224 10.10.0.253 
-ip route 10.10.40.0 255.255.255.248 10.10.0.253
-ip route 0.0.0.0 0.0.0.0 193.41.2.1
-ip route 192.168.122.0 255.255.255.0 192.168.122.253 
+ip route 10.10.40.0 255.255.255.248 10.10.0.253 
 
 access-list 1 permit 10.10.40.0 0.0.0.15
 access-list 1 permit 10.10.66.0 0.0.0.255
@@ -276,7 +273,7 @@ interface Vlan56
 
 interface Vlan64
  ip address 10.10.64.1 255.255.255.224
- ip access-group VLAN66_ACCESS in
+ ip access-group VLAN64_ACCESS in
  standby version 2
  standby 64 timers 5 10
  standby 64 ip 10.10.64.3
@@ -287,6 +284,7 @@ interface Vlan64
 interface Vlan66
  ip address 10.10.66.1 255.255.255.0
  ip helper-address 10.10.40.4
+ ip helper-address 10.10.40.6
  ip access-group VLAN66_ACCESS in
  standby version 2
  standby 66 timers 5 10
@@ -298,6 +296,7 @@ interface Vlan66
 interface Vlan75
  ip address 10.10.75.1 255.255.255.0
  ip helper-address 10.10.40.4
+ ip helper-address 10.10.40.6
  ip access-group VLAN75_ACCESS in
  standby version 2
  standby 75 timers 5 10
@@ -309,6 +308,7 @@ interface Vlan75
 interface Vlan76
  ip address 10.10.76.1 255.255.255.224
  ip helper-address 10.10.40.4
+ ip helper-address 10.10.40.6
  ip access-group VLAN76_ACCESS in
  standby version 2
  standby 76 timers 5 10
@@ -486,7 +486,9 @@ ip access-list extended VLAN76_ACCESS
  permit tcp 10.10.76.0 0.0.0.255 any eq 443
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+ permit ip host 10.10.76.1 any
  permit ip host 10.10.76.2 any
+ permit ip host 10.10.76.3 any
 
 ip access-list extended VLAN75_ACCESS
  permit ip 10.10.75.0 0.0.0.255 10.10.64.0 0.0.0.31
@@ -496,7 +498,9 @@ ip access-list extended VLAN75_ACCESS
  permit tcp 10.10.75.0 0.0.0.255 any eq 443
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+ permit ip host 10.10.75.1 any
  permit ip host 10.10.75.2 any
+ permit ip host 10.10.75.3 any
 
 ip access-list extended VLAN66_ACCESS
  permit ip 10.10.66.0 0.0.0.255 10.10.40.0 0.0.0.15
@@ -505,13 +509,17 @@ ip access-list extended VLAN66_ACCESS
  permit tcp 10.10.66.0 0.0.0.255 any eq 443
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+ permit ip host 10.10.66.1 any
  permit ip host 10.10.66.2 any
+ permit ip host 10.10.66.3 any
 
 ip access-list extended VLAN64_ACCESS
  permit ip 10.10.64.0 0.0.0.31 10.10.40.0 0.0.0.15
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+ permit ip host 10.10.64.1 any
  permit ip host 10.10.64.2 any
+ permit ip host 10.10.64.3 any
 
 ip access-list extended SSH_ACCESS
  permit ip host 10.10.40.4 any
@@ -627,6 +635,7 @@ interface Vlan64
 interface Vlan66
  ip address 10.10.66.2 255.255.255.0
  ip helper-address 10.10.40.4
+ ip helper-address 10.10.40.6
  ip access-group VLAN66_ACCESS in
  standby version 2
  standby 66 timers 5 10
@@ -637,6 +646,7 @@ interface Vlan66
 interface Vlan75
  ip address 10.10.75.2 255.255.255.0
  ip helper-address 10.10.40.4
+ ip helper-address 10.10.40.6
  ip access-group VLAN75_ACCESS in
  standby version 2
  standby 75 timers 5 10
@@ -647,12 +657,12 @@ interface Vlan75
 interface Vlan76
  ip address 10.10.76.2 255.255.255.224
  ip helper-address 10.10.40.4
+ ip helper-address 10.10.40.6
  ip access-group VLAN76_ACCESS in
  standby version 2
  standby 76 timers 5 10
  standby 76 ip 10.10.76.3
- standby 76 priority 150
- standby 76 preempt
+ standby 76 priority 100
  no shutdown
 
 interface Vlan93
@@ -825,6 +835,8 @@ ip access-list extended VLAN76_ACCESS
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
  permit ip host 10.10.76.1 any
+ permit ip host 10.10.76.2 any
+ permit ip host 10.10.76.3 any
 
 ip access-list extended VLAN75_ACCESS
  permit ip 10.10.75.0 0.0.0.255 10.10.64.0 0.0.0.31
@@ -835,6 +847,8 @@ ip access-list extended VLAN75_ACCESS
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
  permit ip host 10.10.75.1 any
+ permit ip host 10.10.75.2 any
+ permit ip host 10.10.75.3 any
 
 ip access-list extended VLAN66_ACCESS
  permit ip 10.10.66.0 0.0.0.255 10.10.40.0 0.0.0.15
@@ -844,12 +858,16 @@ ip access-list extended VLAN66_ACCESS
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
  permit ip host 10.10.66.1 any
+ permit ip host 10.10.66.2 any
+ permit ip host 10.10.66.3 any
 
 ip access-list extended VLAN64_ACCESS
  permit ip 10.10.64.0 0.0.0.31 10.10.40.0 0.0.0.15
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
  permit ip host 10.10.64.1 any
+ permit ip host 10.10.64.2 any
+ permit ip host 10.10.64.3 any
 
 ip access-list extended SSH_ACCESS
  permit ip host 10.10.40.4 any
@@ -997,7 +1015,7 @@ interface Ethernet3/2
  switchport mode trunk
  switchport trunk native vlan 56
  channel-protocol pagp
- channel-group 1 mode desirable
+ channel-group 2 mode desirable
  no shutdown
 
 interface Ethernet3/3
@@ -1005,7 +1023,7 @@ interface Ethernet3/3
  switchport mode trunk
  switchport trunk native vlan 56
  channel-protocol pagp
- channel-group 1 mode desirable
+ channel-group 2 mode desirable
  no shutdown
 
 interface Ethernet4/0
@@ -1171,7 +1189,6 @@ interface Ethernet1/3
 interface Ethernet 2/0
  switchport access vlan 40
  switchport mode access
- no shutdowndown
  switchport port-security
  switchport port-security mac-address sticky
  switchport port-security maximum 1
@@ -1181,7 +1198,6 @@ interface Ethernet 2/0
 interface Ethernet 2/1
  switchport access vlan 40
  switchport mode access
- no shutdowndown
  switchport port-security
  switchport port-security mac-address sticky
  switchport port-security maximum 1
@@ -1215,7 +1231,7 @@ interface Ethernet3/2
  switchport mode trunk
  switchport trunk native vlan 56
  channel-protocol pagp
- channel-group 1 mode desirable
+ channel-group 2 mode desirable
  no shutdown
 
 interface Ethernet3/3
@@ -1223,7 +1239,7 @@ interface Ethernet3/3
  switchport mode trunk
  switchport trunk native vlan 56
  channel-protocol pagp
- channel-group 1 mode desirable
+ channel-group 2 mode desirable
  no shutdown
 
 interface Ethernet4/0
@@ -1432,7 +1448,7 @@ interface Ethernet2/3
  switchport port-security mac-address sticky
  switchport port-security maximum 1
  switchport port-security violation shutdown
- no shutdown
+ no shutdowndown
 
 interface Ethernet 3/0
  switchport access vlan 75
