@@ -1,0 +1,18 @@
+1.
+Ezt próbáldki kézzel beírva valszeg nem fog menni de egy próbát meg ér.
+Stop-Computer -ComputerName "pelda" -Force
+
+
+2.
+Ezek elvileg engedélyezik a parancsot illetve a jó lefutást.
+Enable-NetFirewallRule -DisplayGroup "Windows Remote Management"
+Enable-NetFirewallRule -DisplayGroup "Windows Management Instrumentation (WMI)"
+
+
+3.
+Enable-NetFirewallRule -DisplayGroup "Remote Event Log Management"
+Enable-NetFirewallRule -DisplayGroup "Remote Scheduled Tasks Management"
+
+4.  
+Enable-NetFirewallRule -Name "*Remote*" -PassThru | Enable-NetFirewallRule
+Enable-NetFirewallRule -Name "*WMI*" -PassThru | Enable-NetFirewallRule
