@@ -3690,7 +3690,7 @@ interface Ethernet0/3
  shutdown
 
 interface Ethernet1/0
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3699,7 +3699,7 @@ interface Ethernet1/0
  no shutdown
 
 interface Ethernet1/1
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3708,7 +3708,7 @@ interface Ethernet1/1
  no shutdown
 
 interface Ethernet1/2
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3717,7 +3717,7 @@ interface Ethernet1/2
  no shutdown
 
 interface Ethernet1/3
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3726,7 +3726,7 @@ interface Ethernet1/3
  no shutdown
 
 interface Ethernet2/0
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3735,7 +3735,7 @@ interface Ethernet2/0
  no shutdown
 
 interface Ethernet2/1
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3744,7 +3744,7 @@ interface Ethernet2/1
  no shutdown
 
 interface Ethernet2/2
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3753,7 +3753,7 @@ interface Ethernet2/2
  no shutdown
 
 interface Ethernet2/3
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3762,7 +3762,7 @@ interface Ethernet2/3
  no shutdown
 
 interface Ethernet3/0
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3771,7 +3771,7 @@ interface Ethernet3/0
  no shutdown
 
 interface Ethernet3/1
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3780,7 +3780,7 @@ interface Ethernet3/1
  no shutdown
 
 interface Ethernet3/2
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3789,7 +3789,7 @@ interface Ethernet3/2
  no shutdown
 
 interface Ethernet3/3
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3798,7 +3798,7 @@ interface Ethernet3/3
  no shutdown
 
 interface Ethernet4/0
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3807,7 +3807,7 @@ interface Ethernet4/0
  no shutdown
 
 interface Ethernet4/1
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3816,7 +3816,7 @@ interface Ethernet4/1
  no shutdown
 
 interface Ethernet4/2
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -3825,7 +3825,7 @@ interface Ethernet4/2
  no shutdown
 
 interface Ethernet4/3
- switchport access vlan 40
+ switchport access vlan 75
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
