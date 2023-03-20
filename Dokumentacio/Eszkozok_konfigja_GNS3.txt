@@ -2215,6 +2215,7 @@ ip domain-lookup
 ip ssh version 2
 ip domain-name kan.lan 
 ip name-server 192.168.122.1
+ip name-server 10.20.3.253
 
 enable secret Titok2023
 username buzsak20 privilege 15 secret Titok2023
@@ -2269,7 +2270,6 @@ ip route 10.20.93.0 255.255.255.240 10.20.0.253
 ip route 0.0.0.0 0.0.0.0 193.41.3.1
 ip route 192.168.122.0 255.255.255.0 192.168.122.253
 ip nat inside source static tcp 10.20.0.252 80 192.168.122.254 80 extendable példa
-
 
 ip nat inside source list 1 interface FastEthernet0/0 overload
 
@@ -2447,10 +2447,6 @@ vlan 11
  name WhoMustNotBeenNamed
  exit
 
-vlan 40
- name Server
- exit
-
 vlan 56
  name NASA
  exit
@@ -2475,12 +2471,8 @@ interface Vlan1
  no ip address
  shutdown
 
-interface Vlan40
- ip address 10.20.40.1 255.255.255.240
- no shutdown
-
 interface Vlan56
- ip address ???
+ ip address 10.20.1.253 255.255.255.252
  no shutdown
 
 interface Vlan64

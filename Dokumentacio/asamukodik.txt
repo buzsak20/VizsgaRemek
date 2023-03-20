@@ -1,92 +1,66 @@
-Blesston-R1:
-------------
+Jó ASA jegyzet:
 
-interface GigabitEthernet1/0
- ip address 10.20.0.254 255.255.255.0
- ip nat inside
- ip virtual-reassembly
- negotiation auto
+int g0/0
+ nameif OUTSIDE
+ security-level 0
+ ip add 10.20.0.251 255.255.255.248
+ no shut
 
+int g0/1
+ nameif INSIDE
+ security-level 100
+ ip add 10.20.1.254 255.255.255.252
+ no shut
 
-ip nat inside source list 1 interface FastEthernet0/0 overload
-ip nat inside source static tcp 10.20.0.252 80 192.168.122.254 80 extendable
-!
-access-list 1 permit 10.0.0.0 0.255.255.255
+int g0/2
+ nameif DMZ1
+ security-level 50
+ ip add 10.20.2.254 255.255.255.252
+ no shut
 
-ASA:
-----
-
-interface g0/0
-nameif OUTSIDE
-security-level 0
-ip add 10.20.0.251 255.255.255.248
-no shut
-
-interface g0/1
-INSIDE
-security-level 100
-ip add 10.20.1.254 255.255.255.252
-no shut
-
-interface g0/2
-nameif DMZ1
-security-level 50
-ip add 10.20.2.254 255.255.255.252
-no shut
-
-interface g0/3
-nameif DMZ2
-security-level 50
-ip add 10.20.3.254 255.255.255.252
-no shut
+int g0/3
+ nameif DMZ2
+ security-level 50
+ ip add 10.20.3.254 255.255.255.252
+ no shut
 
 object network outside-subnet
  subnet 10.20.0.248 255.255.255.248
-
 object network inside-subnet
- subnet 10.20.1.252 255.255.255.248
- nat (INSIDE,OUTSIDE) dynamic interface
-
+ subnet 10.20.1.252 255.255.255.252
 object network dmz1-subnet
  subnet 10.20.2.252 255.255.255.252
- nat (DMZ1,OUTSIDE) dynamic interface
-
 object network dmz2-subnet
  subnet 10.20.3.252 255.255.255.252
- nat (DMZ2,OUTSIDE) dynamic interface
-
 object network webserver-external-ip
  host 10.20.0.252
-
 object network webserver
  host 10.20.2.253
- nat (DMZ1,OUTSIDE) static webserver-external-ip service tcp www www
+object network inside-subnet75
+ subnet 10.20.75.0 255.255.255.0
 
 access-list outside_acl extended permit tcp any object webserver eq www
+access-list inside_acl extended permit tcp any any
+access-list inside_acl extended permit udp any any
+
+object network inside-subnet
+ nat (INSIDE,OUTSIDE) dynamic interface
+object network dmz1-subnet
+ nat (DMZ1,OUTSIDE) dynamic interface
+object network dmz2-subnet
+ nat (DMZ2,OUTSIDE) dynamic interface
+object network webserver-dhcp
+ nat (DMZ1,OUTSIDE) static webserver-external-ip service tcp www www
+object network inside-subnet75
+ nat (INSIDE,OUTSIDE) dynamic interface
 
 access-group outside_acl in interface OUTSIDE
 
 route OUTSIDE 0.0.0.0 0.0.0.0 10.20.0.254
+route INSIDE 10.20.75.0 255.255.255.0 10.20.1.253
 
 policy-map global_policy
-
 class inspection_default
-
 inspect icmp
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+inspect http
+inspect dns
