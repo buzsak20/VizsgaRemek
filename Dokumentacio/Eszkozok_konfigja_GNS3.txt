@@ -2258,13 +2258,11 @@ ipv6 router ospf 1
  router-id 3.3.3.3
  passive-interface Ethernet1/0
 
-access-list 1 permit 10.20.40.0 0.0.0.7
-access-list 1 permit 10.20.66.0 0.0.0.255
-access-list 1 permit 10.20.75.0 0.0.0.255
+access-list 1 permit 10.20.0.0 0.0.255.255
 
 ip route 0.0.0.0 0.0.0.0 193.41.3.1
-ip route 192.168.122.0 255.255.255.0 192.168.122.253
-ip nat inside source static tcp 10.20.0.252 80 192.168.122.254 80 extendable példa
+ip route 192.168.122.0 255.255.255.0 192.168.122.252
+ip nat inside source static tcp 10.20.0.252 80 193.41.3.2 80 extendable
 
 ip nat inside source list 1 interface FastEthernet0/0 overload
 
@@ -2294,9 +2292,22 @@ line vty 0 4
 ASA telnet
 https://www.expertnetworkconsultant.com/configuring/configure-cisco-asav-on-gns3-for-hands-on-labs/
 
+conf t
+cd disk0:/
+dir disk0:/
+cd disk0:/coredumpinfo/
+dir
+copy coredump.cfg disk0:/use_ttyS0
+dir disk0:/
+
+
 Blesston-Firewall: Példa egyelőre!!!
 
 hostname Blesston-Firewall
+
+domain-name kan.lan
+dns server-group DefaultDNS
+name-server 10.20.3.253 10.20.0.254
 
 int g0/0
  nameif OUTSIDE
@@ -2433,20 +2444,24 @@ interface Vlan1
  no ip address
  no shut
 
+interface Vlan56
+ no ip address
+ no shut
+
 interface Vlan64
  ip address 10.20.64.1 255.255.255.224
- ip access-group VLAN64_ACCESS in
+! ip access-group VLAN64_ACCESS in
  no shutdown
 
 interface Vlan66
  ip address 10.20.66.1 255.255.255.0
- ip access-group VLAN66_ACCESS in
+! ip access-group VLAN66_ACCESS in
  ip helper-address 10.20.2.253
  no shutdown
 
 interface Vlan75
  ip address 10.20.75.1 255.255.255.0
- ip access-group VLAN75_ACCESS in
+! ip access-group VLAN75_ACCESS in
  ip helper-address 10.20.2.253
  no shutdown
 
@@ -2477,13 +2492,13 @@ interface Ethernet0/3
 
 interface Ethernet1/0
  switchport mode access
- switchport access vlan 11
- shutdown
+ switchport access vlan 66
+ no shutdown
 
 interface Ethernet1/1
  switchport mode access
- switchport access vlan 11
- shutdown
+ switchport access vlan 66
+ no shutdown
 
 interface Ethernet1/2
  switchport mode access
@@ -2575,30 +2590,35 @@ interface Ethernet5/3
  switchport access vlan 11
  shutdown
 
-ip access-list extended VLAN75_ACCESS
- permit ip 10.20.75.0 0.0.0.255 10.30.64.0 0.0.0.31
- permit ip 10.20.75.0 0.0.0.255 10.30.40.0 0.0.0.7
- permit ip 10.20.75.0 0.0.0.255 10.30.0.252 0.0.0.2
- permit tcp 10.20.75.0 0.0.0.255 any eq www
- permit tcp 10.20.75.0 0.0.0.255 any eq 443
- permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
- permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+!ip access-list extended VLAN75_ACCESS
+! permit ip 10.20.75.0 0.0.0.255 10.20.0.248 0.0.0.7
+! permit ip 10.20.75.0 0.0.0.255 10.20.1.252 0.0.0.3
+! permit ip 10.20.75.0 0.0.0.255 10.20.2.252 0.0.0.3
+! permit ip 10.20.75.0 0.0.0.255 10.20.3.252 0.0.0.3
+! permit ip 10.20.75.0 0.0.0.255 10.20.64.0 0.0.0.31
+! permit tcp 10.20.75.0 0.0.0.255 any eq www
+! permit tcp 10.20.75.0 0.0.0.255 any eq 443
+! permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+! permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
 
-ip access-list extended VLAN66_ACCESS
- permit ip 10.20.66.0 0.0.0.255 10.30.40.0 0.0.0.7
- permit ip 10.20.66.0 0.0.0.255 10.30.0.252 0.0.0.2
- permit tcp 10.20.66.0 0.0.0.255 any eq www
- permit tcp 10.20.66.0 0.0.0.255 any eq 443
- permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
- permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+!ip access-list extended VLAN66_ACCESS
+! permit ip 10.20.66.0 0.0.0.255 10.20.0.248 0.0.0.7
+! permit ip 10.20.66.0 0.0.0.255 10.20.1.252 0.0.0.3
+! permit ip 10.20.66.0 0.0.0.255 10.20.2.252 0.0.0.3
+! permit ip 10.20.66.0 0.0.0.255 10.20.3.252 0.0.0.3
+! permit tcp 10.20.66.0 0.0.0.255 any eq www
+! permit tcp 10.20.66.0 0.0.0.255 any eq 443
+! permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+! permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
 
-ip access-list extended VLAN64_ACCESS
- permit ip 10.20.66.0 0.0.0.255 10.30.40.0 0.0.0.7
- permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
- permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
 
-ip access-list extended SSH_ACCESS
- ???
+!ip access-list extended VLAN64_ACCESS
+! permit ip 10.20.66.0 0.0.0.255 10.30.40.0 0.0.0.7
+! permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+! permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+
+!ip access-list extended SSH_ACCESS
+! ???
 
 ip route 0.0.0.0 0.0.0.0 10.20.1.254
 
@@ -2622,7 +2642,7 @@ line vty 0 4
  login local
  transport input ssh
  logging synchronous
- access-class SSH_ACCESS in
+! access-class SSH_ACCESS in
  exit
 end
 
@@ -2639,6 +2659,7 @@ username zandras privilege 15 secret Titok2023
 
 ip ssh version 2
 ip domain-name kan.lan
+ip name-server 10.20.3.253
 
 crypto key generate rsa general-keys modulus 1024
 
@@ -2674,7 +2695,7 @@ interface Ethernet1/0
  no shutdown
 
 interface Ethernet1/1
- switchport access vlan 40
+ switchport access vlan 64
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -2683,7 +2704,7 @@ interface Ethernet1/1
  no shutdown
 
 interface Ethernet1/2
- switchport access vlan 40
+ switchport access vlan 64
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -2692,7 +2713,7 @@ interface Ethernet1/2
  no shutdown
 
 interface Ethernet1/3
- switchport access vlan 40
+ switchport access vlan 64
  switchport mode access
  switchport port-security
  switchport port-security mac-address sticky
@@ -2800,174 +2821,26 @@ interface Ethernet4/2
  no shutdown
 
 interface Ethernet4/3
- switchport access vlan 40
+ switchport access vlan 11
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
- no shutdown
+ shutdown
 
 interface Ethernet5/0
- switchport access vlan 64
+ switchport access vlan 11
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
- no shutdown
+ shutdown
 
 interface Ethernet5/1
- switchport access vlan 64
+ switchport access vlan 11
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
- no shutdown
+ shutdown
 
 interface Ethernet5/2
- switchport access vlan 64
+ switchport access vlan 11
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
- no shutdown
+ shutdown
 
 interface Ethernet5/3
- switchport access vlan 64
- switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
- no shutdown
-
-interface Ethernet6/0
- switchport access vlan 64
- switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
- no shutdown
-
-interface Ethernet6/1
- switchport access vlan 64
- switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
- no shutdown
-
-interface Ethernet6/2
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet6/3
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet7/0
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet7/1
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet7/2
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet7/3
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet8/0
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet8/1
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet8/2
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet8/3
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet9/0
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet9/1
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet9/2
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet9/3
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet10/0
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet10/1
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet10/2
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet10/3
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet11/0
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet11/1
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet11/2
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet11/3
  switchport access vlan 11
  switchport mode access
  shutdown
@@ -2976,13 +2849,13 @@ interface Vlan1
  no ip address
  shutdown
 
+interface Vlan56
+ no ip address
+ no shutdown
+
 interface Vlan11
  no ip address
  shutdown
-
-interface Vlan40
- no ip address
- no shutdown
 
 interface Vlan66
  no ip address
@@ -2993,10 +2866,10 @@ interface Vlan75
  no shutdown
 
 interface Vlan93
- ip address ???
+ ip address 10.20.93.2
  no shutdown
 
-ip default-gateway ???
+ip default-gateway 10.20.93.1
 
 banner motd Q
 Welcome to Blesston-SW1!
