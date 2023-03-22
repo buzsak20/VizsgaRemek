@@ -2291,6 +2291,9 @@ line vty 0 4
 
 -----------------------------------------------------------------------------------
 
+ASA telnet
+https://www.expertnetworkconsultant.com/configuring/configure-cisco-asav-on-gns3-for-hands-on-labs/
+
 Blesston-Firewall: Példa egyelőre!!!
 
 hostname Blesston-Firewall
@@ -2315,7 +2318,7 @@ int g0/2
 
 int g0/3
  nameif DMZ2
- security-level 50
+ security-level 51
  ip add 10.20.3.254 255.255.255.252
  no shut
 
@@ -2331,12 +2334,28 @@ object network webserver-external-ip
  host 10.20.0.252
 object network webserver
  host 10.20.2.253
+object network inside-subnet66
+ subnet 10.20.66.0 255.255.255.0
 object network inside-subnet75
  subnet 10.20.75.0 255.255.255.0
+object network inside-subnet93
+ subnet 10.20.93.0 255.255.255.0
 
+Vagy ez:
 access-list outside_acl extended permit tcp any object webserver eq www
 access-list inside_acl extended permit tcp any any
 access-list inside_acl extended permit udp any any
+access-list dmz1_acl extended permit tcp any any
+access-list dmz1_acl extended permit udp any any
+access-list dmz2_acl extended permit tcp any any
+access-list dmz2_acl extended permit udp any any
+
+vagy ez:
+
+access-list outside_acl extended permit tcp any object webserver eq www
+access-list inside_acl extended permit ip any any
+access-list dmz1_acl extended permit ip any any
+access-list dmz2_acl extended permit ip any any
 
 object network inside-subnet
  nat (INSIDE,OUTSIDE) dynamic interface
@@ -2346,13 +2365,20 @@ object network dmz2-subnet
  nat (DMZ2,OUTSIDE) dynamic interface
 object network webserver-dhcp
  nat (DMZ1,OUTSIDE) static webserver-external-ip service tcp www www
+object network inside-subnet66
+ nat (INSIDE,OUTSIDE) dynamic interface
 object network inside-subnet75
  nat (INSIDE,OUTSIDE) dynamic interface
 
 access-group outside_acl in interface OUTSIDE
+access-group inside_acl in interface INSIDE
+access-group dmz1_acl in interface DMZ1
+access-group dmz2_acl in interface DMZ2
 
 route OUTSIDE 0.0.0.0 0.0.0.0 10.20.0.254
+route INSIDE 10.20.66.0 255.255.255.0 10.20.1.253
 route INSIDE 10.20.75.0 255.255.255.0 10.20.1.253
+route INSIDE 10.20.93.0 255.255.255.248 10.20.1.253
 
 policy-map global_policy
 class inspection_default
@@ -2415,17 +2441,17 @@ interface Vlan64
 interface Vlan66
  ip address 10.20.66.1 255.255.255.0
  ip access-group VLAN66_ACCESS in
- ip helper-address ???
+ ip helper-address 10.20.2.253
  no shutdown
 
 interface Vlan75
  ip address 10.20.75.1 255.255.255.0
  ip access-group VLAN75_ACCESS in
- ip helper-address ???
+ ip helper-address 10.20.2.253
  no shutdown
 
 interface Vlan93
- ip address 10.20.93.1 255.255.255.240
+ ip address 10.20.93.1 255.255.255.248
  no shutdown
 
 interface Ethernet0/0
