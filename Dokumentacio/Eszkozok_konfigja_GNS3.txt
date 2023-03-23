@@ -2305,9 +2305,23 @@ Blesston-Firewall: Példa egyelőre!!!
 
 hostname Blesston-Firewall
 
+ssh version 2
 domain-name kan.lan
 dns server-group DefaultDNS
 name-server 10.20.3.253 10.20.0.254
+
+enable password Titok2023
+username buzsak20 password Titok2023 privilege 15
+username kkrisi password Titok2023 privilege 15
+username zandras password Titok2023 privilege 15
+
+crypto key generate rsa general-keys modulus 1024
+
+ssh 10.20.0.254 255.255.255.255 OUTSIDE
+ssh 10.20.1.253 255.255.255.255 INSIDE
+ssh timeout 5
+
+https://www.youtube.com/watch?v=Pcpbn2QrmKE&ab_channel=NetworkChap
 
 int g0/0
  nameif OUTSIDE
