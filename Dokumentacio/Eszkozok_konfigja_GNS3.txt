@@ -10,6 +10,8 @@ ip domain-name kan.lan
 ip name-server 10.10.40.5
 ip name-server 10.10.40.7
 ip name-server 192.168.122.1
+ntp source FastEthernet 0/0
+clock timezone CET 2
 
 enable secret Titok2023
 username buzsak20 privilege 15 secret Titok2023
@@ -117,6 +119,8 @@ ip domain-name kan.lan
 ip name-server 10.10.40.5
 ip name-server 10.10.40.7
 ip name-server 192.168.122.1
+ntp source FastEthernet 0/0
+clock timezone CET 2
 
 enable secret Titok2023
 username buzsak20 privilege 15 secret Titok2023
@@ -2377,8 +2381,10 @@ object network dmz2-subnet
  subnet 10.20.3.252 255.255.255.252
 object network webserver-external-ip
  host 10.20.0.252
-object network webserver
+object network webserver-dhcp
  host 10.20.2.253
+object network inside-subnet64
+ subnet 10.20.64.0 255.255.255.0
 object network inside-subnet66
  subnet 10.20.66.0 255.255.255.0
 object network inside-subnet75
@@ -2386,21 +2392,29 @@ object network inside-subnet75
 object network inside-subnet93
  subnet 10.20.93.0 255.255.255.0
 
-Vagy ez:
 access-list outside_acl extended permit tcp any object webserver eq www
-access-list inside_acl extended permit tcp any any
-access-list inside_acl extended permit udp any any
-access-list dmz1_acl extended permit tcp any any
-access-list dmz1_acl extended permit udp any any
-access-list dmz2_acl extended permit tcp any any
-access-list dmz2_acl extended permit udp any any
-
-vagy ez:
-
-access-list outside_acl extended permit tcp any object webserver eq www
-access-list inside_acl extended permit ip any any
+access-list outside_acl extended permit tcp host 10.20.0.254  
+access-list inside_acl extended permit ip any any <-- Írd át! Ez tartalmazza az összes belső hálózati címeit (Vlanok)
 access-list dmz1_acl extended permit ip any any
 access-list dmz2_acl extended permit ip any any
+
+Ezt írd át az inside_acl_in nek megfelelően:
+
+IN
+access-list inside_acl_in extended permit tcp 10.20.0.0 255.255.0.0 any eq domain
+access-list inside_acl_in extended permit udp 10.20.0.0 255.255.0.0 any eq domain
+access-list inside_acl_in extended permit tcp 10.20.0.0 255.255.0.0 any eq www
+access-list inside_acl_in extended permit udp 10.20.0.0 255.255.0.0 any eq www
+access-list inside_acl_in extended permit tcp 10.20.0.0 255.255.0.0 any eq https
+access-list inside_acl_in extended permit udp host 0.0.0.0 any eq bootpc
+access-list inside_acl_in extended permit udp host 0.0.0.0 any eq bootps
+access-list inside_acl_in extended permit tcp 10.20.0.0 255.255.0.0 any echo
+
+access-list inside_acl_in extended permit udp host 0.0.0.0 host 10.20.2.253 eq bootpc
+
+
+OUT
+access-list inside_acl_out extended permit icmp 10.20.75.0 255.255.255.0 any echo-reply
 
 object network inside-subnet
  nat (INSIDE,OUTSIDE) dynamic interface
@@ -2421,6 +2435,7 @@ access-group dmz1_acl in interface DMZ1
 access-group dmz2_acl in interface DMZ2
 
 route OUTSIDE 0.0.0.0 0.0.0.0 10.20.0.254
+route INSIDE 10.20.64.0 255.255.255.224 10.20.1.253
 route INSIDE 10.20.66.0 255.255.255.0 10.20.1.253
 route INSIDE 10.20.75.0 255.255.255.0 10.20.1.253
 route INSIDE 10.20.93.0 255.255.255.248 10.20.1.253
@@ -2624,16 +2639,18 @@ interface Ethernet5/3
  switchport access vlan 11
  shutdown
 
-!ip access-list extended VLAN75_ACCESS
-! permit ip 10.20.75.0 0.0.0.255 10.20.0.248 0.0.0.7
-! permit ip 10.20.75.0 0.0.0.255 10.20.1.252 0.0.0.3
-! permit ip 10.20.75.0 0.0.0.255 10.20.2.252 0.0.0.3
-! permit ip 10.20.75.0 0.0.0.255 10.20.3.252 0.0.0.3
-! permit ip 10.20.75.0 0.0.0.255 10.20.64.0 0.0.0.31
-! permit tcp 10.20.75.0 0.0.0.255 any eq www
-! permit tcp 10.20.75.0 0.0.0.255 any eq 443
-! permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
-! permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+ip access-list extended VLAN75_ACCESS_IN
+ permit tcp 10.20.75.0 0.0.0.255 any eq 56
+ permit tcp 10.20.75.0 0.0.0.255 any eq 80
+ permit tcp 10.20.75.0 0.0.0.255 any eq 443
+ permit icmp 10.20.75.0 0.0.0.255 any 
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
+ permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+ permit icmp 10.20.75.0 0.0.0.255 any echo
+
+ip access-list extended VLAN75_ACCESS_OUT
+ permit icmp 10.20.75.0 0.0.0.255 any echo-reply
+
 
 !ip access-list extended VLAN66_ACCESS
 ! permit ip 10.20.66.0 0.0.0.255 10.20.0.248 0.0.0.7
@@ -3045,6 +3062,8 @@ username buzsak20 privilege 15 secret Titok2023
 username kkrisi privilege 15 secret Titok2023
 username zandras privilege 15 secret Titok2023
 
+crypto key generate rsa general-keys modulus 1024
+
 vtp mode server
 vtp domain kan.lan
 vtp password thispasswordisasecret
@@ -3250,9 +3269,8 @@ ip access-list extended VLAN66_ACCESS
  permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
 
 ip access-list extended VLAN64_ACCESS
- permit ip 10.30.66.0 0.0.0.255 10.30.40.0 0.0.0.7
- permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
- permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
+ permit ip 10.30.64.0 0.0.0.255 10.30.40.0 0.0.0.7
+ permit ip 10.30.64.0 0.0.0.255 10.30.75.0 0.0.0.31
 
 ip access-list extended SSH_ACCESS
  permit ip host 10.30.40.2 any
