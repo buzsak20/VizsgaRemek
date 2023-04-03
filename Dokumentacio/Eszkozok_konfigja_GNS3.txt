@@ -11,7 +11,7 @@ ip name-server 10.10.40.5
 ip name-server 10.10.40.7
 ip name-server 192.168.122.1
 ntp source FastEthernet 0/0
-clock timezone CET 2
+!clock timezone CET 2
 
 enable secret Titok2023
 username buzsak20 privilege 15 secret Titok2023
@@ -120,7 +120,7 @@ ip name-server 10.10.40.5
 ip name-server 10.10.40.7
 ip name-server 192.168.122.1
 ntp source FastEthernet 0/0
-clock timezone CET 2
+!clock timezone CET 2
 
 enable secret Titok2023
 username buzsak20 privilege 15 secret Titok2023
@@ -165,6 +165,7 @@ ipv6 router ospf 1
  router-id 2.2.2.2
  passive-interface Ethernet1/0
 
+ip route 0.0.0.0 0.0.0.0 192.168.122.253
 ip route 10.10.93.0 255.255.255.240 10.10.0.253
 ip route 10.10.76.0 255.255.255.224 10.10.0.253
 ip route 10.10.75.0 255.255.255.0 10.10.0.253 
@@ -202,16 +203,6 @@ line vty 0 4
  exit
 
 end
-
-OSPF:
-
-interface serial 0/0/0
- ip ospf authentication message-digest
- ip ospf message-digest-key 1 md5 cisco
-
-interface serial 0/0/0
- ip ospf authentication message-digest
- ip ospf message-digest-key 1 md5 cisco
 
 -----------------------------------------------------------------------------------
 
@@ -2271,7 +2262,14 @@ ipv6 router ospf 1
  router-id 3.3.3.3
  passive-interface Ethernet1/0
 
+ip access-list extended SSH_ACCESS_IPv4
+ deny ip any any
+
+ipv6 access-list SSH_ACCESS_IPv6
+ permit ipv6 host 2001:BABA::1 any
+
 access-list 1 permit 10.20.0.0 0.0.255.255
+
 
 ip route 0.0.0.0 0.0.0.0 193.41.3.1
 ip route 192.168.122.0 255.255.255.0 192.168.122.252
@@ -2298,17 +2296,9 @@ line con 0
 line vty 0 4
  login local
  transport input ssh
+ access-class SSH_ACCESS_IPv4 in
+ ipv6 access-class SSH_ACCESS_IPv6 in
  exit
-
-OSPF jelszóval:
-
-interface serial 0/0/0
- ip ospf authentication message-digest
- ip ospf message-digest-key 1 md5 cisco
-
-interface serial 0/0/0
- ip ospf authentication message-digest
- ip ospf message-digest-key 1 md5 cisco
 
 -----------------------------------------------------------------------------------
 
