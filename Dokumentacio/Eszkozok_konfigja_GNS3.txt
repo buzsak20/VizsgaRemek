@@ -29,7 +29,7 @@ crypto isakmp key vpnciscokey address 193.41.4.2
 crypto ipsec transform-set VPN-SET esp-aes esp-sha-hmac
 
 crypto map VPN-MAP 1 ipsec-isakmp 
- description VPN connection to Second Small Office R1
+ description VPN connection to Coleton-R1
  set peer 193.41.4.2
  set transform-set VPN-SET 
  match address VPN_Connection
@@ -46,8 +46,8 @@ interface e1/0
  no shutdown
 
 interface e1/0.56
- ip address 10.10.0.252 255.255.255.248
  encapsulation dot1Q 56
+ ip address 10.10.0.252 255.255.255.248
  ip nat inside
  standby 1 ip 10.10.0.250
  standby 1 priority 150
@@ -74,14 +74,16 @@ ip route 10.10.64.0 255.255.255.224 10.10.0.251
 ip route 10.10.40.0 255.255.255.240 10.10.0.251 
 ip route 0.0.0.0 0.0.0.0 193.41.1.1
 
+ip access-list extended NAT
+ deny   ip 10.10.40.0 0.0.0.15 10.30.0.0 0.0.255.255
+ permit ip 10.10.40.0 0.0.0.15 any
+ permit ip 10.10.66.0 0.0.0.255 any
+ permit ip 10.10.75.0 0.0.0.255 any
+ permit ip 10.10.76.0 0.0.0.255 any
 ip access-list extended VPN_Connection
- permit ip 10.10.0.248 0.0.0.7 10.30.0.252 0.0.0.3
-access-list 1 permit 10.10.40.0 0.0.0.15
-access-list 1 permit 10.10.66.0 0.0.0.255
-access-list 1 permit 10.10.75.0 0.0.0.255
-access-list 1 permit 10.10.76.0 0.0.0.31
+ permit ip 10.10.0.0 0.0.255.255 10.30.0.0 0.0.255.255
 
-ip nat inside source list 1 interface f0/0 overload
+ip nat inside source list NAT interface FastEthernet0/0 overload
 
 banner motd Q
 Welcome to Marathon-R1!
@@ -2965,7 +2967,7 @@ crypto isakmp key vpnciscokey address 193.41.1.2
 crypto ipsec transform-set VPN-SET esp-aes esp-sha-hmac
 
 crypto map VPN-MAP 1 ipsec-isakmp 
- description VPN connection to Main Office R1
+ description VPN connection to Marathon-R1
  set peer 193.41.1.2
  set transform-set VPN-SET
  match address VPN_Connection
@@ -2999,12 +3001,6 @@ interface Ethernet1/3
  no ip address
  shutdown
 
-ip access-list extended VPN_Connection
- permit ip 10.30.0.252 0.0.0.3 10.10.0.248 0.0.0.7
-access-list 1 permit 10.30.40.0 0.0.0.7
-access-list 1 permit 10.30.66.0 0.0.0.255
-access-list 1 permit 10.30.75.0 0.0.0.255
-
 ip route 10.30.40.0 255.255.255.248 10.30.0.253
 ip route 10.30.64.0 255.255.255.224 10.30.0.253
 ip route 10.30.66.0 255.255.255.0 10.30.0.253
@@ -3013,7 +3009,15 @@ ip route 10.30.93.0 255.255.255.240 10.30.0.253
 ip route 0.0.0.0 0.0.0.0 193.41.4.1
 ip route 192.168.122.0 255.255.255.0 192.168.1.254
 
-ip nat inside source list 1 interface FastEthernet0/0 overload
+ip access-list extended NAT
+ deny   ip 10.30.40.0 0.0.0.7 10.10.0.0 0.0.255.255
+ permit ip 10.30.40.0 0.0.0.7 any
+ permit ip 10.30.66.0 0.0.0.255 any
+ permit ip 10.30.75.0 0.0.0.255 any
+ip access-list extended VPN_Connection
+ permit ip 10.30.0.0 0.0.255.255 10.10.0.0 0.0.255.255
+
+ip nat inside source list NAT interface FastEthernet0/0 overload
 
 banner motd Q
 Welcome to Coleton-R1!
