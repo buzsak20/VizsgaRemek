@@ -2238,7 +2238,7 @@ interface Tunnel1
  tunnel destination 193.41.2.2
 
 interface FastEthernet0/0
- ip address 193.41.3.2 255.255.255.252
+ ip address 193.41.3.2 255.255.255.248
  ip nat outside
  no shutdown
 
@@ -2270,14 +2270,16 @@ ip access-list extended SSH_ACCESS_IPv4
 ipv6 access-list SSH_ACCESS_IPv6
  permit ipv6 host 2001:BABA::1 any
 
-access-list 1 permit 10.20.0.0 0.0.255.255
+ip nat pool NAT_POOL 193.41.3.3 193.41.3.6 netmask 255.255.255.248
 
+ip access-list extended NAT
+ permit ip 10.20.0.0 0.0.255.255 any
 
 ip route 0.0.0.0 0.0.0.0 193.41.3.1
 ip route 192.168.122.0 255.255.255.0 192.168.122.252
 ip nat inside source static tcp 10.20.0.252 80 193.41.3.2 80 extendable
 
-ip nat inside source list 1 interface FastEthernet0/0 overload
+ip nat inside source list NAT pool NAT_POOL
 
 banner motd Q
 Welcome to Blesston-R1!
