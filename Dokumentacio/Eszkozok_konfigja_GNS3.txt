@@ -2335,31 +2335,31 @@ username zandras password Titok2023 privilege 15
 
 crypto key generate rsa general-keys modulus 1024
 
-ssh 10.20.0.254 255.255.255.255 OUTSIDE
-ssh 10.20.1.253 255.255.255.255 INSIDE
-ssh timeout 5
+!ssh 10.20.0.254 255.255.255.255 OUTSIDE
+!ssh 10.20.1.253 255.255.255.255 INSIDE
+!ssh timeout 5
 
-https://www.youtube.com/watch?v=Pcpbn2QrmKE&ab_channel=NetworkChap
+!https://www.youtube.com/watch?v=Pcpbn2QrmKE&ab_channel=NetworkChap
 
-int g0/0
+int g0
  nameif OUTSIDE
  security-level 0
  ip add 10.20.0.251 255.255.255.248
  no shut
 
-int g0/1
+int g1
  nameif INSIDE
  security-level 100
  ip add 10.20.1.254 255.255.255.252
  no shut
 
-int g0/2
+int g2
  nameif DMZ1
  security-level 50
  ip add 10.20.2.254 255.255.255.252
  no shut
 
-int g0/3
+int g3
  nameif DMZ2
  security-level 51
  ip add 10.20.3.254 255.255.255.252
@@ -2386,29 +2386,30 @@ object network inside-subnet75
 object network inside-subnet93
  subnet 10.20.93.0 255.255.255.0
 
-access-list outside_acl extended permit tcp any object webserver eq www
-access-list outside_acl extended permit tcp host 10.20.0.254  
-access-list inside_acl extended permit ip any any <-- Írd át! Ez tartalmazza az összes belső hálózati címeit (Vlanok)
-access-list dmz1_acl extended permit ip any any
+access-list outside_acl extended permit tcp any object webserver-dhcp eq www
+access-list inside_acl extended permit ip 10.20.75.0 255.255.255.0 host 10.20.2.253
+access-list inside_acl extended permit ip 10.20.75.0 255.255.255.0 host 10.20.3.253
+access-list inside_acl extended permit tcp 10.20.75.0 255.255.255.0 any eq 53
+access-list inside_acl extended permit udp 10.20.75.0 255.255.255.0 any eq 53
+access-list inside_acl extended permit tcp 10.20.75.0 255.255.255.0 any eq 80
+access-list inside_acl extended permit udp 10.20.75.0 255.255.255.0 any eq 80
+access-list inside_acl extended permit tcp 10.20.75.0 255.255.255.0 any eq 443
+access-list inside_acl extended permit udp 10.20.75.0 255.255.255.0 any eq 443
+access-list inside_acl extended permit ip 10.20.66.0 255.255.255.0 host 10.20.3.253
+access-list inside_acl extended permit ip 10.20.66.0 255.255.255.0 host 10.20.2.253
+access-list inside_acl extended permit tcp 10.20.66.0 255.255.255.0 any eq 53
+access-list inside_acl extended permit udp 10.20.66.0 255.255.255.0 any eq 53
+access-list inside_acl extended permit tcp 10.20.66.0 255.255.255.0 any eq 80
+access-list inside_acl extended permit udp 10.20.66.0 255.255.255.0 any eq 80
+access-list inside_acl extended permit tcp 10.20.66.0 255.255.255.0 any eq 443
+access-list inside_acl extended permit udp 10.20.66.0 255.255.255.0 any eq 443
+access-list inside_acl extended permit ip 10.20.64.0 255.255.255.0 host 10.20.2.253
+access-list inside_acl extended permit ip 10.20.64.0 255.255.255.0 host 10.20.3.253
+access-list inside_acl extended permit ip 10.20.93.0 255.255.255.0 any
+access-list inside_acl extended permit udp host 0.0.0.0 any eq bootpc
+access-list inside_acl extended permit udp host 0.0.0.0 any eq bootps 
+access-list dmz1_acl extended permit ip host 10.20.2.253 any
 access-list dmz2_acl extended permit ip any any
-
-Ezt írd át az inside_acl_in nek megfelelően:
-
-IN
-access-list inside_acl_in extended permit tcp 10.20.0.0 255.255.0.0 any eq domain
-access-list inside_acl_in extended permit udp 10.20.0.0 255.255.0.0 any eq domain
-access-list inside_acl_in extended permit tcp 10.20.0.0 255.255.0.0 any eq www
-access-list inside_acl_in extended permit udp 10.20.0.0 255.255.0.0 any eq www
-access-list inside_acl_in extended permit tcp 10.20.0.0 255.255.0.0 any eq https
-access-list inside_acl_in extended permit udp host 0.0.0.0 any eq bootpc
-access-list inside_acl_in extended permit udp host 0.0.0.0 any eq bootps
-access-list inside_acl_in extended permit tcp 10.20.0.0 255.255.0.0 any echo
-
-access-list inside_acl_in extended permit udp host 0.0.0.0 host 10.20.2.253 eq bootpc
-
-
-OUT
-access-list inside_acl_out extended permit icmp 10.20.75.0 255.255.255.0 any echo-reply
 
 object network inside-subnet
  nat (INSIDE,OUTSIDE) dynamic interface
