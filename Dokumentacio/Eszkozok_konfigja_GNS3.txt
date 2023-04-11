@@ -11,7 +11,6 @@ ip name-server 10.10.40.5
 ip name-server 10.10.40.7
 ip name-server 192.168.122.1
 ntp source FastEthernet 0/0
-!clock timezone CET 2
 
 enable secret Titok2023
 username buzsak20 privilege 15 secret Titok2023
