@@ -174,12 +174,14 @@ ip route 10.10.66.0 255.255.255.0 10.10.0.253
 ip route 10.10.64.0 255.255.255.224 10.10.0.253 
 ip route 10.10.40.0 255.255.255.248 10.10.0.253 
 
-access-list 1 permit 10.10.40.0 0.0.0.15
-access-list 1 permit 10.10.66.0 0.0.0.255
-access-list 1 permit 10.10.75.0 0.0.0.255
-access-list 1 permit 10.10.76.0 0.0.0.31
+ip access-list extended NAT
+ deny   ip 10.10.40.0 0.0.0.15 10.30.0.0 0.0.255.255
+ permit ip 10.10.40.0 0.0.0.15 any
+ permit ip 10.10.66.0 0.0.0.255 any
+ permit ip 10.10.75.0 0.0.0.255 any
+ permit ip 10.10.76.0 0.0.0.255 any
 
-ip nat inside source list 1 interface f0/0 overload
+ip nat inside source list NAT interface FastEthernet0/0 overload
 
 banner motd Q
 Welcome to Marathon-R2!
@@ -2493,18 +2495,15 @@ interface Vlan56
 
 interface Vlan64
  ip address 10.20.64.1 255.255.255.224
-! ip access-group VLAN64_ACCESS in
  no shutdown
 
 interface Vlan66
  ip address 10.20.66.1 255.255.255.0
-! ip access-group VLAN66_ACCESS in
  ip helper-address 10.20.2.253
  no shutdown
 
 interface Vlan75
  ip address 10.20.75.1 255.255.255.0
-! ip access-group VLAN75_ACCESS in
  ip helper-address 10.20.2.253
  no shutdown
 
@@ -2633,37 +2632,9 @@ interface Ethernet5/3
  switchport access vlan 11
  shutdown
 
-ip access-list extended VLAN75_ACCESS_IN
- permit tcp 10.20.75.0 0.0.0.255 any eq 56
- permit tcp 10.20.75.0 0.0.0.255 any eq 80
- permit tcp 10.20.75.0 0.0.0.255 any eq 443
- permit icmp 10.20.75.0 0.0.0.255 any 
- permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
- permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
- permit icmp 10.20.75.0 0.0.0.255 any echo
-
-ip access-list extended VLAN75_ACCESS_OUT
- permit icmp 10.20.75.0 0.0.0.255 any echo-reply
-
-
-!ip access-list extended VLAN66_ACCESS
-! permit ip 10.20.66.0 0.0.0.255 10.20.0.248 0.0.0.7
-! permit ip 10.20.66.0 0.0.0.255 10.20.1.252 0.0.0.3
-! permit ip 10.20.66.0 0.0.0.255 10.20.2.252 0.0.0.3
-! permit ip 10.20.66.0 0.0.0.255 10.20.3.252 0.0.0.3
-! permit tcp 10.20.66.0 0.0.0.255 any eq www
-! permit tcp 10.20.66.0 0.0.0.255 any eq 443
-! permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
-! permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
-
-
-!ip access-list extended VLAN64_ACCESS
-! permit ip 10.20.66.0 0.0.0.255 10.30.40.0 0.0.0.7
-! permit udp host 0.0.0.0 host 255.255.255.255 eq bootpc
-! permit udp host 0.0.0.0 host 255.255.255.255 eq bootps
-
-!ip access-list extended SSH_ACCESS
-! ???
+ip access-list extended SSH_ACCESS
+ permit ip host 10.20.2.253 any
+ permit ip host 10.20.3.253 any
 
 ip route 0.0.0.0 0.0.0.0 10.20.1.254
 
@@ -3330,19 +3301,19 @@ interface Vlan11
 
 interface Vlan40
  no ip address
- no shutdowndown
+ no shutdown
 
 interface Vlan66
  no ip address
- no shutdowndown
+ no shutdown
 
 interface Vlan75
  no ip address
- no shutdowndown
+ no shutdown
 
 interface Vlan93
  ip address 10.30.93.2 255.255.255.240
- no shutdowndown
+ no shutdown
 
 
 interface Ethernet0/0
