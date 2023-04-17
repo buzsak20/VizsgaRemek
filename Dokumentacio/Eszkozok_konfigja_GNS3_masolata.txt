@@ -121,7 +121,6 @@ ip name-server 10.10.40.5
 ip name-server 10.10.40.7
 ip name-server 192.168.122.1
 ntp source FastEthernet 0/0
-!clock timezone CET 2
 
 enable secret Titok2023
 username buzsak20 privilege 15 secret Titok2023
@@ -925,154 +924,6 @@ username zandras privilege 15 secret Titok2023
 
 crypto key generate rsa general-keys modulus 1024
 
-vtp mode client
-vtp domain kan.lan
-vtp password thispasswordisasecret
-
-interface Port-channel2
- switchport trunk encapsulation dot1q
- switchport mode trunk
- switchport trunk native vlan 56
- no shutdown
-
-interface Ethernet0/0
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet0/1
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet0/2
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet0/3
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet1/0
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet1/1
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet1/2
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet1/3
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet 2/0
- switchport access vlan 40
- switchport mode access
- no shutdowndown
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
- no shutdown
-
-interface Ethernet 2/1
- switchport access vlan 40
- switchport mode access
- no shutdowndown
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
- no shutdown
-
-interface Ethernet2/2
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet2/3
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet 3/0
- switchport trunk encapsulation dot1q
- switchport mode trunk
- switchport trunk native vlan 56
- no shutdown
-
-interface Ethernet 3/1
- switchport trunk encapsulation dot1q
- switchport mode trunk
- switchport trunk native vlan 56
- no shutdown
-
-interface Ethernet3/2
- switchport trunk encapsulation dot1q
- switchport mode trunk
- switchport trunk native vlan 56
- channel-protocol pagp
- channel-group 2 mode desirable
- no shutdown
-
-interface Ethernet3/3
- switchport trunk encapsulation dot1q
- switchport mode trunk
- switchport trunk native vlan 56
- channel-protocol pagp
- channel-group 2 mode desirable
- no shutdown
-
-interface Ethernet4/0
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet4/1
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet4/2
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet4/3
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet5/0
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet5/1
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet5/2
- switchport access vlan 11
- switchport mode access
- shutdown
-
-interface Ethernet5/3
- switchport access vlan 11
- switchport mode access
- shutdown
-
 interface vlan1
  shutdown
 
@@ -1100,49 +951,6 @@ interface vlan76
 interface vlan93
  ip address 10.10.93.4 255.255.255.240
  no shutdown
-
-ip default-gateway 10.10.93.3
-
-banner motd Q
-Welcome to Marathon-ML-SW3!
-Entry of unauthorized persons is prohibited!
-In the event of unauthorized access, unwanted events occur!
-Q
-
-banner login Q
-Welcome to Marathon-ML-SW3!
-Entry of unauthorized persons is prohibited!
-In the event of unauthorized access, unwanted events occur!
-Q
-
-line con 0
- login local
- logging synchronous
-
-line vty 0 4
- login local
- transport input ssh
- logging synchronous
- exit
-
------------------------------------------------------------------------------------
-
-Marathon-ML-SW4:
-
-hostname Marathon-ML-SW4
-
-ip ssh version 2
-ip domain-name kan.lan
-ip name-server 10.10.40.5
-ip name-server 10.10.40.7
-
-enable secret Titok2023
-username buzsak20 privilege 15 secret Titok2023
-username kkrisi privilege 15 secret Titok2023
-username zandras privilege 15 secret Titok2023
-
-crypto key generate rsa general-keys modulus 1024
-
 vtp mode client
 vtp domain kan.lan
 vtp password thispasswordisasecret
@@ -1196,6 +1004,7 @@ interface Ethernet1/3
 interface Ethernet 2/0
  switchport access vlan 40
  switchport mode access
+ no shutdowndown
  switchport port-security
  switchport port-security mac-address sticky
  switchport port-security maximum 1
@@ -1205,6 +1014,7 @@ interface Ethernet 2/0
 interface Ethernet 2/1
  switchport access vlan 40
  switchport mode access
+ no shutdowndown
  switchport port-security
  switchport port-security mac-address sticky
  switchport port-security maximum 1
@@ -1288,6 +1098,59 @@ interface Ethernet5/3
  switchport access vlan 11
  switchport mode access
  shutdown
+
+ip default-gateway 10.10.93.3
+
+ip access-list extended SSH_ACCESS
+ permit ip host 10.10.40.4 any
+ permit ip host 10.10.40.5 any
+ permit ip host 10.10.40.6 any
+ permit ip host 10.10.40.7 any
+ permit ip host 10.10.93.1 any
+ permit ip host 10.10.93.2 any
+ permit ip host 10.10.0.252 any
+ permit ip host 10.10.0.254 any
+
+banner motd Q
+Welcome to Marathon-ML-SW3!
+Entry of unauthorized persons is prohibited!
+In the event of unauthorized access, unwanted events occur!
+Q
+
+banner login Q
+Welcome to Marathon-ML-SW3!
+Entry of unauthorized persons is prohibited!
+In the event of unauthorized access, unwanted events occur!
+Q
+
+line con 0
+ login local
+ logging synchronous
+
+line vty 0 4
+ login local
+ transport input ssh
+ logging synchronous
+ access-class SSH_ACCESS in
+ exit
+
+-----------------------------------------------------------------------------------
+
+Marathon-ML-SW4:
+
+hostname Marathon-ML-SW4
+
+ip ssh version 2
+ip domain-name kan.lan
+ip name-server 10.10.40.5
+ip name-server 10.10.40.7
+
+enable secret Titok2023
+username buzsak20 privilege 15 secret Titok2023
+username kkrisi privilege 15 secret Titok2023
+username zandras privilege 15 secret Titok2023
+
+crypto key generate rsa general-keys modulus 1024
 
 interface vlan1
  shutdown
@@ -1317,7 +1180,163 @@ interface vlan93
  ip address 10.10.93.5 255.255.255.240
  no shutdown
 
+vtp mode client
+vtp domain kan.lan
+vtp password thispasswordisasecret
+
+interface Port-channel2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ no shutdown
+
+interface Ethernet0/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet0/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet1/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet 2/0
+ switchport access vlan 40
+ switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
+ no shutdown
+
+interface Ethernet 2/1
+ switchport access vlan 40
+ switchport mode access
+ switchport port-security
+ switchport port-security mac-address sticky
+ switchport port-security maximum 1
+ switchport port-security violation shutdown
+ no shutdown
+
+interface Ethernet2/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet2/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet 3/0
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ no shutdown
+
+interface Ethernet 3/1
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ no shutdown
+
+interface Ethernet3/2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ channel-protocol pagp
+ channel-group 2 mode desirable
+ no shutdown
+
+interface Ethernet3/3
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 56
+ channel-protocol pagp
+ channel-group 2 mode desirable
+ no shutdown
+
+interface Ethernet4/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet4/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/0
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/1
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/2
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
+interface Ethernet5/3
+ switchport access vlan 11
+ switchport mode access
+ shutdown
+
 ip default-gateway 10.10.93.3
+
+ip access-list extended SSH_ACCESS
+ permit ip host 10.10.40.4 any
+ permit ip host 10.10.40.5 any
+ permit ip host 10.10.40.6 any
+ permit ip host 10.10.40.7 any
+ permit ip host 10.10.93.1 any
+ permit ip host 10.10.93.2 any
+ permit ip host 10.10.0.252 any
+ permit ip host 10.10.0.254 any
 
 banner motd Q
 Welcome to Marathon-ML-SW4!
@@ -1339,6 +1358,7 @@ line vty 0 4
  login local
  transport input ssh
  logging synchronous
+ access-class SSH_ACCESS in
  exit
 
 -----------------------------------------------------------------------------------
@@ -1358,6 +1378,34 @@ username kkrisi privilege 15 secret Titok2023
 username zandras privilege 15 secret Titok2023
 
 crypto key generate rsa general-keys modulus 1024
+
+interface vlan1
+ shutdown
+
+interface Vlan11
+ shutdown
+
+interface vlan40
+ no shutdown
+
+interface vlan56
+ no shutdown
+
+interface vlan64
+ no shutdown
+
+interface vlan66
+ shut
+
+interface vlan75
+ no shutdown
+
+interface vlan76
+ no shutdown
+
+interface vlan93
+ ip address 10.20.93.6 255.255.255.240
+ no shutdown
 
 vtp mode client
 vtp domain kan.lan
@@ -1558,246 +1606,136 @@ interface Ethernet5/3
  shutdown
 
 interface Ethernet6/0
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet6/1
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet6/2
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet6/3
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet7/0
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet7/1
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet7/2
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet7/3
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet8/0
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet8/1
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet8/2
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet8/3
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet9/0
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet9/1
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet9/2
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet9/3
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet10/0
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet10/1
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet10/2
- switchport access vlan 76
  switchport mode access
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet10/3
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet11/0
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet11/1
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet11/2
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet11/3
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
- no shutdown
-
-interface vlan1
- shutdown
-
-interface Vlan11
- shutdown
-
-interface vlan40
- no shutdown
-
-interface vlan56
- no shutdown
-
-interface vlan64
- no shutdown
-
-interface vlan66
- shut
-
-interface vlan75
- no shutdown
-
-interface vlan76
- no shutdown
-
-interface vlan93
- ip address 10.20.93.6 255.255.255.240
+ switchport access vlan 76
  no shutdown
 
 ip default-gateway 10.10.93.3
+
+ip access-list extended SSH_ACCESS
+ permit ip host 10.10.40.4 any
+ permit ip host 10.10.40.5 any
+ permit ip host 10.10.40.6 any
+ permit ip host 10.10.40.7 any
+ permit ip host 10.10.93.1 any
+ permit ip host 10.10.93.2 any
+ permit ip host 10.10.0.252 any
+ permit ip host 10.10.0.254 any
 
 banner motd Q
 Welcome to Marathon-SW1!
@@ -1819,6 +1757,7 @@ line vty 0 4
  login local
  transport input ssh
  logging synchronous
+ access-class SSH_ACCESS in
  exit
 
 -----------------------------------------------------------------------------------
@@ -2002,39 +1941,23 @@ interface Ethernet4/3
  no shutdown
 
 interface Ethernet5/0
+switchport mode access
  switchport access vlan 76
- switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
  no shutdown
 
 interface Ethernet5/1
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet5/2
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet5/3
- switchport access vlan 76
  switchport mode access
- switchport port-security
- switchport port-security mac-address sticky
- switchport port-security maximum 1
- switchport port-security violation shutdown
+ switchport access vlan 76
  no shutdown
 
 interface Ethernet6/0
@@ -2187,6 +2110,16 @@ interface vlan93
 
 ip default-gateway 10.10.93.3
 
+ip access-list extended SSH_ACCESS
+ permit ip host 10.10.40.4 any
+ permit ip host 10.10.40.5 any
+ permit ip host 10.10.40.6 any
+ permit ip host 10.10.40.7 any
+ permit ip host 10.10.93.1 any
+ permit ip host 10.10.93.2 any
+ permit ip host 10.10.0.252 any
+ permit ip host 10.10.0.254 any
+
 banner motd Q
 Welcome to Marathon-SW2!
 Entry of unauthorized persons is prohibited!
@@ -2207,6 +2140,7 @@ line vty 0 4
  login local
  transport input ssh
  logging synchronous
+ access-class SSH_ACCESS in
  exit
 
 -----------------------------------------------------------------------------------
@@ -2223,6 +2157,7 @@ ip ssh version 2
 ip domain-name kan.lan 
 ip name-server 192.168.122.1
 ip name-server 10.20.3.253
+ntp source FastEthernet 0/0
 
 enable secret Titok2023
 username buzsak20 privilege 15 secret Titok2023
@@ -2307,19 +2242,7 @@ line vty 0 4
 
 -----------------------------------------------------------------------------------
 
-ASA telnet
-https://www.expertnetworkconsultant.com/configuring/configure-cisco-asav-on-gns3-for-hands-on-labs/
-
-conf t
-cd disk0:/
-dir disk0:/
-cd disk0:/coredumpinfo/
-dir
-copy coredump.cfg disk0:/use_ttyS0
-dir disk0:/
-
-
-Blesston-Firewall: Példa egyelőre!!!
+Blesston-Firewall:
 
 hostname Blesston-Firewall
 
@@ -2457,10 +2380,6 @@ username buzsak20 privilege 15 secret Titok2023
 username kkrisi privilege 15 secret Titok2023
 username zandras privilege 15 secret Titok2023
 
-vtp mode server
-vtp domain kan.lan
-vtp password thispasswordisasecret
-
 vlan 11
  name WhoMustNotBeenNamed
  exit
@@ -2510,6 +2429,10 @@ interface Vlan75
 interface Vlan93
  ip address 10.20.93.1 255.255.255.248
  no shutdown
+
+vtp mode server
+vtp domain kan.lan
+vtp password thispasswordisasecret 
 
 interface Ethernet0/0
  no switchport
@@ -2633,6 +2556,7 @@ interface Ethernet5/3
  shutdown
 
 ip access-list extended SSH_ACCESS
+ permit ip host 10.20.1.254 any
  permit ip host 10.20.2.253 any
  permit ip host 10.20.3.253 any
 
@@ -2658,7 +2582,7 @@ line vty 0 4
  login local
  transport input ssh
  logging synchronous
-! access-class SSH_ACCESS in
+ access-class SSH_ACCESS in
  exit
 end
 
@@ -2679,14 +2603,39 @@ ip name-server 10.20.3.253
 
 crypto key generate rsa general-keys modulus 1024
 
+interface Vlan1
+ no ip address
+ no shutdown
+
+interface Vlan56
+ no ip address
+ no shutdown
+
+interface Vlan11
+ no ip address
+ shutdown
+
+interface Vlan66
+ no ip address
+ ip helper-address 10.20.2.253
+ no shutdown
+
+interface Vlan75
+ no ip address
+ ip helper-address 10.20.2.253
+ no shutdown
+
+interface Vlan93
+ ip address 10.20.93.2
+ no shutdown
+
 vtp mode client
 vtp domain kan.lan
 vtp password thispasswordisasecret
 
 interface Ethernet0/0
- switchport trunk encapsulation dot1q
- switchport trunk native vlan 56
- switchport mode trunk
+ no switchport
+ ip address 10.20.1.253 255.255.255.252
  no shutdown
 
 interface Ethernet0/1
@@ -2860,33 +2809,13 @@ interface Ethernet5/3
  switchport mode access
  shutdown
 
-interface Vlan1
- no ip address
- shutdown
-
-interface Vlan56
- no ip address
- no shutdown
-
-interface Vlan11
- no ip address
- shutdown
-
-interface Vlan66
- no ip address
- ip helper-address 10.20.2.253
- no shutdown
-
-interface Vlan75
- no ip address
- ip helper-address 10.20.2.253
- no shutdown
-
-interface Vlan93
- ip address 10.20.93.2
- no shutdown
-
 ip default-gateway 10.20.93.1
+
+ip access-list extended SSH_ACCESS
+ permit ip host 10.20.1.254 any
+ permit ip host 10.20.2.253 any
+ permit ip host 10.20.3.253 any
+ permit ip host 10.20.93.1 any
 
 banner motd Q
 Welcome to Blesston-SW1!
@@ -2908,9 +2837,9 @@ line vty 0 4
  login local
  transport input ssh
  logging synchronous
+ access-class SSH_ACCESS in
  exit
 end
-
 
 __Harmadik telephely eszköz konfiguráció__
 
@@ -2923,6 +2852,7 @@ ip ssh version 2
 ip domain-name kan.lan
 ip name-server 10.30.40.3
 ip name-server 192.168.122.1
+ntp source FastEthernet 0/0
 
 enable secret Titok2023
 username buzsak20 privilege 15 secret Titok2023
@@ -3031,10 +2961,6 @@ username zandras privilege 15 secret Titok2023
 
 crypto key generate rsa general-keys modulus 1024
 
-vtp mode server
-vtp domain kan.lan
-vtp password thispasswordisasecret
-
 vlan 11
  name WhoMustNotBeenNamed
  exit
@@ -3095,6 +3021,10 @@ interface Vlan75
 interface Vlan93
  ip address 10.30.93.1 255.255.255.240
  no shutdown
+
+vtp mode server
+vtp domain kan.lan
+vtp password thispasswordisasecret
 
 interface Ethernet0/0
  switchport trunk encapsulation dot1q
@@ -3287,10 +3217,6 @@ ip name-server 10.30.40.3
 
 crypto key generate rsa general-keys modulus 1024
 
-vtp mode client
-vtp domain kan.lan
-vtp password thispasswordisasecret
-
 interface Vlan1
  no ip address
  shutdown
@@ -3315,6 +3241,9 @@ interface Vlan93
  ip address 10.30.93.2 255.255.255.240
  no shutdown
 
+vtp mode client
+vtp domain kan.lan
+vtp password thispasswordisasecret
 
 interface Ethernet0/0
  switchport mode access
@@ -3447,6 +3376,12 @@ interface Ethernet5/3
 
 ip default-gateway 10.30.93.1
 
+ip access-list extended SSH_ACCESS
+ permit ip host 10.30.40.2 any
+ permit ip host 10.30.40.3 any
+ permit ip host 10.30.93.1 any
+ permit ip host 10.30.0.254 any
+
 banner motd Q
 Welcome to Coleton-SW1!
 Entry of unauthorized persons is prohibited!
@@ -3467,6 +3402,7 @@ line vty 0 4
  login local
  transport input ssh
  logging synchronous
+ access-class SSH_ACCESS in
  exit
 end
 
@@ -3486,10 +3422,6 @@ ip domain-name kan.lan
 ip name-server 10.30.40.3
 
 crypto key generate rsa general-keys modulus 1024
-
-vtp mode client
-vtp domain kan.lan
-vtp password thispasswordisasecret
 
 interface Vlan1
  no ip address
@@ -3514,6 +3446,10 @@ interface Vlan75
 interface Vlan93
  ip address 10.30.93.3 255.255.255.240
  no shutdown
+
+vtp mode client
+vtp domain kan.lan
+vtp password thispasswordisasecret
 
 interface Ethernet0/0
  switchport mode access
@@ -3846,6 +3782,12 @@ interface Ethernet11/3
 
 ip default-gateway 10.30.93.1
 
+ip access-list extended SSH_ACCESS
+ permit ip host 10.30.40.2 any
+ permit ip host 10.30.40.3 any
+ permit ip host 10.30.93.1 any
+ permit ip host 10.30.0.254 any
+
 banner motd Q
 Welcome to Coleton-SW2!
 Entry of unauthorized persons is prohibited!
@@ -3866,6 +3808,7 @@ line vty 0 4
  login local
  transport input ssh
  logging synchronous
+ access-class SSH_ACCESS in
  exit
 end
 
