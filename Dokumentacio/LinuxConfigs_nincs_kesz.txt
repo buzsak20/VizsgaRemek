@@ -1,0 +1,433 @@
+__Linux Szerverek Konfigurációs állományainak gyűjteménye__
+
+Marathon:
+
+Linux Server Main
+
+/etc/dhcp/dhcpd.conf
+
+option domain-name "kan.lan";
+option domain-name-servers 10.10.40.5, 10.10.40.7;
+
+default-lease-time 600;
+max-lease-time 7200;
+
+# DHCP Failover Configuration - PRIMARY
+
+failover peer "dhcp-failover" {
+	primary;
+	address 10.10.40.4;
+	port 847;
+	peer address 10.10.40.6;
+	peer port 647;
+	max-response-delay 60;
+	max-unacked-updates 10;
+	mclt 3600;
+	split 255;
+	load balance max seconds 5;
+}
+
+############### [ SUBNETS ] ###############
+
+# Vlan 40 Server
+
+subnet 10.10.40.0 netmask 255.255.255.240 {
+	range 10.10.40.4 10.10.40.7;
+	option routers 10.10.40.3;
+}
+
+# Vlan 76 Ports
+
+subnet 10.10.76.0 netmask 255.255.255.224 {
+	option broadcast-address 10.10.76.31;
+	option subnet-mask 255.255.255.224;
+	option routers 10.10.76.3;
+	pool {
+		failover peer "dhcp-failover";
+		range 10.10.76.5 10.10.76.30;
+	    }
+}
+
+# Vlan 75 Office
+
+subnet 10.10.75.0 netmask 255.255.255.0 {
+	option broadcast-address 10.10.75.255;
+	option subnet-mask 255.255.255.0;
+	option routers 10.10.75.3;
+	pool {
+		failover peer "dhcp-failover";
+		range 10.10.75.10 10.10.75.254;
+	    }
+}
+
+# Vlan 66 Wi-Fi
+
+subnet 10.10.66.0 netmask 255.255.255.0 {
+	option broadcast-address 10.10.66.31;
+	option subnet-mask 255.255.255.0;
+	option routers 10.10.66.3;
+	pool {
+		failover peer "dhcp-failover";
+		range 10.10.66.10 10.10.66.254;
+	    }
+}
+
+/etc/default/isc-dhcp-server
+
+# Defaults for isc-dhcp-server (sourced by /etc/init.d/isc-dhcp-server)
+
+# Path to dhcpd's config file (default: /etc/dhcp/dhcpd.conf).
+#DHCPDv4_CONF=/etc/dhcp/dhcpd.conf
+#DHCPDv6_CONF=/etc/dhcp/dhcpd6.conf
+
+# Path to dhcpd's PID file (default: /var/run/dhcpd.pid).
+#DHCPDv4_PID=/var/run/dhcpd.pid
+#DHCPDv6_PID=/var/run/dhcpd6.pid
+
+# Additional options to start dhcpd with.
+#	Don't use options -cf or -pf here; use DHCPD_CONF/ DHCPD_PID instead
+#OPTIONS=""
+
+# On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
+#	Separate multiple interfaces with spaces, e.g. "eth0 eth1".
+INTERFACESv4="enp0s3"
+INTERFACESv6=""
+
+/etc/network/interfaces
+
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+
+allow-hotplug enp0s3
+iface enp0s3 inet static
+	address 10.10.40.4
+	netmask 255.255.255.240
+	network 10.10.40.0
+	gateway 10.10.40.3
+
+---------------------------------------------------------------------------------------------------------------
+
+Linus Server Second
+
+/etc/dhcp/dhcpd.conf
+
+# option definitions common to all supported networks...
+option domain-name "kan.lan";
+option domain-name-servers 10.10.40.5, 10.10.40.7;
+
+default-lease-time 600;
+max-lease-time 7200;
+
+# DHCP Failover Configuration - SECONDARY
+
+failover peer "dhcp-failover" {
+    secondary;
+    address 10.10.40.6;
+    port 647;
+    peer address 10.10.40.4;
+    peer port 847;
+    max-response-delay 60;
+    max-unacked-updates 10;
+    load balance max seconds 5;
+}
+
+############### [ SUBNETS ] ###############
+
+# Vlan 40 Server
+
+subnet 10.10.40.0 netmask 255.255.255.240 {
+	range 10.10.40.4 10.10.40.7;
+	option routers 10.10.40.3;
+}
+
+# Vlan 76 Ports
+
+subnet 10.10.76.0 netmask 255.255.255.224 {
+	option broadcast-address 10.10.76.31;
+	option subnet-mask 255.255.255.224;
+	option routers 10.10.76.3;
+	pool {
+		failover peer "dhcp-failover";
+		range 10.10.76.5 10.10.76.30;
+	    }
+}
+
+# Vlan 75 Office
+
+subnet 10.10.75.0 netmask 255.255.255.0 {
+	option broadcast-address 10.10.75.255;
+	option subnet-mask 255.255.255.0;
+	option routers 10.10.75.3;
+	pool {
+		failover peer "dhcp-failover";
+		range 10.10.75.10 10.10.75.254;
+	    }
+}
+
+# Vlan 66 Wi-Fi
+
+subnet 10.10.66.0 netmask 255.255.255.0 {
+	option broadcast-address 10.10.66.255;
+	option subnet-mask 255.255.255.0;
+	option routers 10.10.66.3;
+	pool {
+		failover peer "dhcp-failover";
+		range 10.10.66.10 10.10.66.254;
+	    }
+}
+
+/etc/default/isc-dhcp-server
+
+# Defaults for isc-dhcp-server (sourced by /etc/init.d/isc-dhcp-server)
+
+# Path to dhcpd's config file (default: /etc/dhcp/dhcpd.conf).
+#DHCPDv4_CONF=/etc/dhcp/dhcpd.conf
+#DHCPDv6_CONF=/etc/dhcp/dhcpd6.conf
+
+# Path to dhcpd's PID file (default: /var/run/dhcpd.pid).
+#DHCPDv4_PID=/var/run/dhcpd.pid
+#DHCPDv6_PID=/var/run/dhcpd6.pid
+
+# Additional options to start dhcpd with.
+#	Don't use options -cf or -pf here; use DHCPD_CONF/ DHCPD_PID instead
+#OPTIONS=""
+
+# On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
+#	Separate multiple interfaces with spaces, e.g. "eth0 eth1".
+INTERFACESv4="enp0s3"
+INTERFACESv6=""
+
+/etc/network/interfaces
+
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+allow-hotplug enp0s3
+iface enp0s3 inet static
+	address 10.10.40.6
+	netmask 255.255.255.240
+	network 10.10.40.0
+	gateway 10.10.40.3
+
+---------------------------------------------------------------------------------------------------------------
+
+Blesston
+
+Linux Server (Web/DHCP)
+
+# dhcpd.conf
+
+option domain-name "kan.lan";
+option domain-name-servers 10.20.3.253, 192.168.122.1;
+
+default-lease-time 600;
+max-lease-time 7200;
+
+# Server
+
+subnet 10.20.2.252 netmask 255.255.255.252 {
+<------>range 10.20.2.253 10.20.2.253;
+<------>option routers 10.20.2.254;
+}
+
+# Vlan 75 Office
+
+subnet 10.20.75.0 netmask 255.255.255.0 {
+<------>range 10.20.75.10 10.20.75.254;
+<------>option routers 10.20.75.1;
+}
+
+# Vlan 66 Wi-Fi
+
+subnet 10.20.66.0 netmask 255.255.255.0 {
+<------>range 10.20.66.10 10.20.66.254;
+<------>option routers 10.20.66.1;
+}
+
+
+
+# Defaults for isc-dhcp-server (sourced by /etc/init.d/isc-dhcp-server)
+
+# Path to dhcpd's config file (default: /etc/dhcp/dhcpd.conf).
+#DHCPDv4_CONF=/etc/dhcp/dhcpd.conf
+#DHCPDv6_CONF=/etc/dhcp/dhcpd6.conf
+
+# Path to dhcpd's PID file (default: /var/run/dhcpd.pid).
+#DHCPDv4_PID=/var/run/dhcpd.pid
+#DHCPDv6_PID=/var/run/dhcpd6.pid
+
+# Additional options to start dhcpd with.
+#<----->Don't use options -cf or -pf here; use DHCPD_CONF/ DHCPD_PID instead
+#OPTIONS=""
+
+# On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
+#<----->Separate multiple interfaces with spaces, e.g. "eth0 eth1".
+INTERFACESv4="enp0s3"
+INTERFACESv6=""
+
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+allow-hotplug enp0s3
+iface enp0s3 inet static
+<------>address 10.20.2.253
+<------>netmask 255.255.255.252
+<------>network 10.20.2.252
+<------>gateway 10.20.2.254
+
+/etc/hostname
+
+DbOffice2
+
+
+
+---------------------------------------------------------------------------------------------------------------
+
+Coleton
+
+Linux Server (DHCP/SAMBA)
+
+/etc/dhcp/dhcpd.conf
+
+option domain-name "kan.lan";
+option domain-name-servers 10.30.40.3, 192.168.122.1;
+
+default-lease-time 600;
+max-lease-time 7200;
+
+# Vlan 40 Server
+
+subnet 10.30.40.0 netmask 255.255.255.240 {
+<------>range 10.30.40.2 10.30.40.3;
+<------>option routers 10.30.40.1;
+}
+
+# Vlan 75 Office
+
+subnet 10.30.75.0 netmask 255.255.255.0 {
+<------>range 10.30.75.10 10.30.75.254;
+<------>option routers 10.30.75.1;
+}
+
+# Vlan 66 Wi-Fi
+
+subnet 10.30.66.0 netmask 255.255.255.0 {
+<------>range 10.30.66.10 10.30.66.254;
+<------>option routers 10.30.66.1;
+}
+
+/etc/default/isc-dhcp-server
+
+# Defaults for isc-dhcp-server (sourced by /etc/init.d/isc-dhcp-server)
+
+# Path to dhcpd's config file (default: /etc/dhcp/dhcpd.conf).
+#DHCPDv4_CONF=/etc/dhcp/dhcpd.conf
+#DHCPDv6_CONF=/etc/dhcp/dhcpd6.conf
+
+# Path to dhcpd's PID file (default: /var/run/dhcpd.pid).
+#DHCPDv4_PID=/var/run/dhcpd.pid
+#DHCPDv6_PID=/var/run/dhcpd6.pid
+
+# Additional options to start dhcpd with.
+#<----->Don't use options -cf or -pf here; use DHCPD_CONF/ DHCPD_PID instead
+#OPTIONS=""
+
+# On what interfaces should the DHCP server (dhcpd) serve DHCP requests?
+#<----->Separate multiple interfaces with spaces, e.g. "eth0 eth1".
+INTERFACESv4="enp0s3"
+INTERFACESv6=""
+
+/etc/network/interfaces
+
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+allow-hotplug enp0s3
+iface enp0s3 inet static
+<------>address 10.30.40.2
+<------>netmask 255.255.255.248
+<------>network 10.30.40.0
+<------>gateway 10.30.40.1
+
+/etc/resolv.conf
+
+domain kan.lan
+search kan.lan
+nameserver 10.30.40.3
+nameserver 192.168.122.1
+
+/ect/fstab
+
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
+#
+# systemd generates mount units based on this file, see systemd.mount(5).
+# Please run 'systemctl daemon-reload' after making changes here.
+#
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+# / was on /dev/sda2 during installation
+UUID=85d4a60f-6ac3-4b3e-be8e-de60caf1199b /               ext4    errors=remount-ro 0       1
+# /boot was on /dev/sda1 during installation
+UUID=3a2291ad-4662-4d9d-ba74-355cd7c8c67e /boot           ext4    defaults        0       2
+# /home was on /dev/sda3 during installation
+UUID=9637c115-0f36-4060-9278-9d85815db482 /home           ext4    defaults        0       2
+# swap was on /dev/sda4 during installation
+UUID=432caba8-1ea0-4e13-b822-82e27df0adc3 none            swap    sw              0       0
+/dev/sr0        /media/cdrom0   udf,iso9660 user,noauto     0       0
+# backup partition for Windows Server 2019
+UUID="2872a91d-febe-4630-98aa-9cdc83a1fc03" /mnt/backup   ext4    defaults    0    0
+
+/etc/samba/smb.conf
+
+################ [GLOBAL CONFIG] ################
+
+[global]
+workgroup = kan.lan
+log file /home/samba/log/
+max log size = 1000
+logging = file
+server role = standalone server
+interfaces = 10.30.40.0/24
+min protocol = SMB2
+
+################ [BACKUP DIRECTORY SHARE] ################
+
+[backup]
+comment = Windows Server 2019 Biztonsági Mentései
+path = /mnt/backup/
+read only = no
+writeable = yes
+valid users = @administrators
+
