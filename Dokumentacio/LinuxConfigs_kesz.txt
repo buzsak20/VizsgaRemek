@@ -4,6 +4,10 @@ Marathon:
 
 Linux Server Main
 
+/etc/hostname
+
+DbOffice1
+
 /etc/dhcp/dhcpd.conf
 
 option domain-name "kan.lan";
@@ -113,9 +117,21 @@ iface enp0s3 inet static
 	network 10.10.40.0
 	gateway 10.10.40.3
 
+/etc/resolv.conf
+
+domain kan.lan
+search kan.lan
+nameserver 10.10.40.5
+nameserver 10.10.40.7
+nameserver 192.168.122.1
+
 ---------------------------------------------------------------------------------------------------------------
 
-Linus Server Second
+Linux Server Second
+
+/etc/hostname
+
+DbOffice1R
 
 /etc/dhcp/dhcpd.conf
 
@@ -224,11 +240,25 @@ iface enp0s3 inet static
 	network 10.10.40.0
 	gateway 10.10.40.3
 
+/etc/resolv.conf
+
+domain kan.lan
+search kan.lan
+nameserver 10.10.40.5
+nameserver 10.10.40.7
+nameserver 192.168.122.1
+
 ---------------------------------------------------------------------------------------------------------------
 
 Blesston
 
-Linux Server (Web/DHCP)
+Linux Server (WEB/DHCP)
+
+/etc/hostname
+
+DbOffice2
+
+/etc/dhcp/dhcpd.conf
 
 # dhcpd.conf
 
@@ -238,7 +268,9 @@ option domain-name-servers 10.20.3.253, 192.168.122.1;
 default-lease-time 600;
 max-lease-time 7200;
 
-# Server
+############### [ SUBNETS ] ###############
+
+# Vlan 40 Server
 
 subnet 10.20.2.252 netmask 255.255.255.252 {
 <------>range 10.20.2.253 10.20.2.253;
@@ -259,7 +291,7 @@ subnet 10.20.66.0 netmask 255.255.255.0 {
 <------>option routers 10.20.66.1;
 }
 
-
+/etc/default/isc-dhcp-server
 
 # Defaults for isc-dhcp-server (sourced by /etc/init.d/isc-dhcp-server)
 
@@ -280,6 +312,8 @@ subnet 10.20.66.0 netmask 255.255.255.0 {
 INTERFACESv4="enp0s3"
 INTERFACESv6=""
 
+/etc/network/interfaces
+
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 
@@ -297,17 +331,22 @@ iface enp0s3 inet static
 <------>network 10.20.2.252
 <------>gateway 10.20.2.254
 
-/etc/hostname
+/etc/resolv.conf
 
-DbOffice2
-
-
+domain kan.lan
+search kan.lan
+nameserver 10.20.3.253
+nameserver 192.168.122.1
 
 ---------------------------------------------------------------------------------------------------------------
 
 Coleton
 
 Linux Server (DHCP/SAMBA)
+
+/etc/hostname
+
+DbOffice3
 
 /etc/dhcp/dhcpd.conf
 
@@ -316,6 +355,8 @@ option domain-name-servers 10.30.40.3, 192.168.122.1;
 
 default-lease-time 600;
 max-lease-time 7200;
+
+############### [ SUBNETS ] ###############
 
 # Vlan 40 Server
 
@@ -430,4 +471,3 @@ path = /mnt/backup/
 read only = no
 writeable = yes
 valid users = @administrators
-
