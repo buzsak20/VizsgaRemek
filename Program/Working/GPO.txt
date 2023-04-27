@@ -1,1 +1,0 @@
-https://www.techrepublic.com/article/how-to-enable-powershell-remoting-via-group-policy/
